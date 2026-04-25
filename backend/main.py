@@ -1,6 +1,15 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
+from auth import (
+    create_user,
+    authenticate_user
+)
+from schemas import (
+    UserSignup,
+    UserLogin
+)
+
 from database import init_db
 from schemas import (
     PatientProfile,
@@ -40,6 +49,37 @@ init_db()
 def health():
     return {
         "status": "running"
+    }
+
+@app.post("/api/auth/signup")
+def signup(user: UserSignup):
+    create_user(
+        user.email,
+        user.password
+    )
+
+    return {
+        "success": True,
+        "message": "Signup successful"
+    }
+
+
+@app.post("/api/auth/login")
+def login(user: UserLogin):
+    auth = authenticate_user(
+        user.email,
+        user.password
+    )
+
+    if not auth:
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid credentials"
+        )
+
+    return {
+        "success": True,
+        "message": "Login successful"
     }
 
 

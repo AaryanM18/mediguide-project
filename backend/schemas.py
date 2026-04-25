@@ -5,6 +5,15 @@ class FamilyHistoryItem(BaseModel):
     condition: str
     relation: str
 
+class UserSignup(BaseModel):
+    email: str
+    password: str
+
+
+class UserLogin(BaseModel):
+    email: str
+    password: str
+
 class PatientProfile(BaseModel):
     user_id: str
     name: str
