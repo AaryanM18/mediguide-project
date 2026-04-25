@@ -1,122 +1,93 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import LoginPage from './pages/LoginPage';
+import SignupPage from './pages/SignupPage';
+import HomePage from './pages/HomePage';
+import ProfilePage from './pages/ProfilePage';
+import HistoryPage from './pages/HistoryPage';
+import HealthProfilePage from './pages/HealthProfilePage';
+import SymptomAnalysisPage from './pages/SymptomAnalysisPage';
+import SymptomSearchPage from './pages/SymptomSearchPage';
+import SavedPage from './pages/SavedPage';
+import LearnPage from './pages/LearnPage';
+import CategoriesPage from './pages/CategoriesPage';
+import RemedyDetailPage from './pages/RemedyDetailPage';
+import LibraryDetailPage from './pages/LibraryDetailPage';
+import PhilosophyPage from './pages/PhilosophyPage';
+import BottomNav from './components/BottomNav';
+import './index.css'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [user, setUser] = React.useState(null);
+
+  React.useEffect(() => {
+    const savedUserId = localStorage.getItem('user_id');
+    const savedUserName = localStorage.getItem('user_name');
+    if (savedUserId) {
+        setUser({ id: savedUserId, name: savedUserName || 'User' });
+    }
+  }, []);
+
+  const handleLogin = (userId, name) => {
+    let derivedName = name;
+    if (!derivedName && userId) {
+      derivedName = userId.split('@')[0].replace(/[._]/g, ' ');
+      derivedName = derivedName.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+    } else if (!derivedName) {
+      derivedName = 'User';
+    }
+    localStorage.setItem('user_id', userId);
+    localStorage.setItem('user_name', derivedName);
+    setUser({ id: userId, name: derivedName });
+  };
+
+  const handleSignup = (userId, name, password) => {
+    localStorage.setItem('user_id', userId);
+    localStorage.setItem('user_name', name);
+    if (password) localStorage.setItem(`auth_password_${userId}`, password);
+    localStorage.setItem('is_new', 'true');
+    setUser({ id: userId, name: name });
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('user_id');
+    localStorage.removeItem('user_name');
+    setUser(null);
+  };
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+    <Router>
+      <div id="root-container">
+        <Routes>
+          <Route path="/login" element={!user ? <LoginPage onLogin={handleLogin} /> : <Navigate to="/" />} />
+          <Route path="/signup" element={!user ? <SignupPage onSignup={handleSignup} /> : <Navigate to="/health-profile" />} />
+          <Route path="/*" element={user ? (
+            <>
+              <main style={{ paddingBottom: '80px', minHeight: '100vh' }}>
+                <Routes>
+                  <Route index element={<HomePage user={user} />} />
+                  <Route path="/profile" element={<ProfilePage user={user} onLogout={handleLogout} />} />
+                  <Route path="/history" element={<HistoryPage user={user} />} />
+                  <Route path="/health-profile" element={<HealthProfilePage user={user} />} />
+                  <Route path="/find" element={<SymptomAnalysisPage user={user} />} />
+                  <Route path="/search" element={<SymptomSearchPage user={user} />} />
+                  <Route path="/saved" element={<SavedPage user={user} />} />
+                  <Route path="/analyze" element={<SymptomAnalysisPage user={user} />} />
+                  <Route path="/learn" element={<LearnPage user={user} />} />
+                  <Route path="/categories" element={<CategoriesPage user={user} />} />
+                  <Route path="/remedy/:id" element={<RemedyDetailPage user={user} />} />
+                  <Route path="/remedy-library/:name" element={<LibraryDetailPage user={user} />} />
+                  <Route path="/philosophy" element={<PhilosophyPage user={user} />} />
+                  <Route path="*" element={<Navigate to="/" />} />
+                </Routes>
+              </main>
+              <BottomNav />
+            </>
+          ) : <Navigate to="/login" />} />
+        </Routes>
+      </div>
+    </Router>
+  );
 }
 
-export default App
+export default App;

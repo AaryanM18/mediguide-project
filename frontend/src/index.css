@@ -1,1 +1,65 @@
-@import "tailwindcss";
+:root {
+  --primary: #8b5cf6;
+  --primary-light: #a78bfa;
+  --primary-dark: #7c3aed;
+  --dark-header: #36354a;
+  --text-main: #33324f;
+  --text-secondary: #7e7a9e;
+  --background: #dfd7fc;
+  --radius: 24px;
+  --radius-sm: 12px;
+  --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  font-family: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+  line-height: 1.5;
+  color: var(--text-main);
+  background: var(--background);
+  min-height: 100vh;
+}
+
+#root {
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+  box-shadow: 0 0 50px rgba(0,0,0,0.1);
+  background: linear-gradient(170deg, #bfaef7 0%, #f1edfd 100%);
+}
+
+#root::before {
+  content: "";
+  position: absolute;
+  top: -50px;
+  right: -50px;
+  width: 300px;
+  height: 300px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 50%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Base fade animation */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+  animation: fadeIn 0.4s ease forwards;
+}
+
+input, button {
+  font-family: inherit;
+}
