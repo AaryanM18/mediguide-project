@@ -48,25 +48,46 @@ const getBaseUrl = () => {
 const BASE_URL = getBaseUrl();
 
 export const loginUser = async (email, password) => {
-    const res = await fetch(`${BASE_URL}/api/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user_id: email, data: { password: password } })
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.detail || "Login failed");
-    return data;
+  const res = await fetch(`${BASE_URL}/api/auth/login`, {
+    method: "POST",
+    headers: {
+      "Content-Type":"application/json"
+    },
+    body: JSON.stringify({
+      email: email,
+      password: password
+    })
+  });
+
+  const data = await res.json();
+
+  if (!res.ok){
+    throw data;
+  }
+
+  return data;
 };
 
 export const signupUser = async (email, name, password) => {
-    const res = await fetch(`${BASE_URL}/api/auth/signup`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user_id: email, data: { name, password } })
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.detail || "Signup failed");
-    return data;
+  const res = await fetch(`${BASE_URL}/api/auth/signup`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      email: email,
+      username: name,
+      password: password
+    })
+  });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    throw data;
+  }
+
+  return data;
 };
 
 export const registerPatient = async (patientData) => {

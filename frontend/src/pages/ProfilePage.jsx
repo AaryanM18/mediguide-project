@@ -28,8 +28,8 @@ const ProfilePage = ({ user, onLogout }) => {
                 <div className="profile-avatar-big">
                     <User size={40} color="white" />
                 </div>
-                <h1>{user.name}</h1>
-                <p className="email-label">{user.id}</p>
+                <h1>{user?.name || user?.username || 'User'}</h1>
+<p className="email-label">{user?.id || user?.email || 'No email found'}</p>
             </header>
 
             <div className="profile-body">
@@ -42,11 +42,11 @@ const ProfilePage = ({ user, onLogout }) => {
                         </div>
                         <div className="snapshot-item">
                             <Activity size={16} color="#ef4444" />
-                            <span>{profile.blood_group || 'O+'}</span>
+                            <span>{profile?.blood_group || 'Not set'}</span>
                         </div>
                         <div className="snapshot-item">
                             <Heart size={16} color="#f43f5e" />
-                            <span>{profile.thermal || 'Chilly'} sensitive</span>
+                            <span>{profile?.thermal ? `${profile.thermal} sensitive` : 'Not set'}</span>
                         </div>
                     </div>
                 )}

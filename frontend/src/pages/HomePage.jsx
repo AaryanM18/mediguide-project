@@ -44,7 +44,7 @@ const HomePage = ({ user }) => {
             <header className="home-header">
                 <div className="header-text">
                     <p>{getGreeting()}</p>
-                    <h1>{user.name.split(' ')[0]} 👋</h1>
+                    <h1>{(user?.name || user?.username || user?.id || 'User').split(' ')[0]} 👋</h1>
                 </div>
                 <div className="header-avatar" onClick={() => navigate('/profile')}>
                     <User size={24} color="white" />

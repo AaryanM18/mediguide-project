@@ -8,212 +8,321 @@ const LoginPage = ({ onLogin }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading,setLoading] = useState(false);
+
   const navigate = useNavigate();
+
+  const parseBackendError = (err) => {
+    if (!err) return "Unknown error";
+
+    if (typeof err === "string") return err;
+
+    if (err.message && typeof err.message === "string") {
+      if (!err.message.includes("[object Object]")) {
+        return err.message;
+      }
+    }
+
+    if (Array.isArray(err.detail)) {
+      return err.detail.map(e => e.msg || JSON.stringify(e)).join(", ");
+    }
+
+    if (typeof err.detail === "string") {
+      return err.detail;
+    }
+
+    if (typeof err.response?.data?.detail === "string") {
+      return err.response.data.detail;
+    }
+
+    if (Array.isArray(err.response?.data?.detail)) {
+      return err.response.data.detail
+        .map(e => e.msg || JSON.stringify(e))
+        .join(", ");
+    }
+
+    if (typeof err.response?.data?.message === "string") {
+      return err.response.data.message;
+    }
+
+    return "Login failed. Please check credentials.";
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    setError('');
+    setLoading(true);
+
     try {
-        const data = await loginUser(email, password);
-        setError('');
-        onLogin(email, data.name);
+      const data = await loginUser(email,password);
+
+      setError('');
+      onLogin(email, data.username || data.name || email);
+
     } catch (err) {
-        setError(err.message || "Network error connecting to backend server.");
-        if (err.message === "User not found") {
-            setError("Invalid ID. Redirecting to signup...");
-            setTimeout(() => navigate('/signup'), 1500);
-        }
+
+      const parsedError = parseBackendError(err);
+
+      if (
+        parsedError.toLowerCase().includes("user not found")
+      ) {
+        setError("User not found. Redirecting to signup...");
+        setTimeout(() => navigate('/signup'),1500);
+      }
+      else if (
+        parsedError.toLowerCase().includes("invalid password") ||
+        parsedError.toLowerCase().includes("incorrect password")
+      ) {
+        setError("Incorrect password.");
+      }
+      else {
+        setError(parsedError);
+      }
+
+      console.error("Login error:", err);
+
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div className="login-wrapper fade-in">
-        <div className="logo-section">
-            <div className="logo-circle">
-                <Sparkles size={40} color="#8b5cf6" className="sparkle-main" />
-            </div>
-            <h1>MediGuide AI</h1>
-            <p>Your Personal Homeo Advisor</p>
+      <div className="logo-section">
+        <div className="logo-circle">
+          <Sparkles size={40} color="#8b5cf6" className="sparkle-main"/>
         </div>
 
-        <div className="login-card">
-            <h2>Welcome Back</h2>
-            {error && (
-                <div style={{background: '#fee2e2', color: '#ef4444', padding: '12px', borderRadius: '12px', marginBottom: '16px', fontSize: '14px', textAlign: 'center', fontWeight: '600'}}>
-                    {error}
-                </div>
-            )}
-            <form onSubmit={handleSubmit}>
-                <div className="input-group">
-                    <AtSign size={20} className="input-icon" />
-                    <input 
-                        type="email" 
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        placeholder="Email Address" 
-                        required
-                    />
-                </div>
+        <h1>MediGuide AI</h1>
+        <p>Your Personal Homeo Advisor</p>
+      </div>
 
-                <div className="input-group">
-                    <Lock size={20} className="input-icon" />
-                    <input 
-                        type={showPassword ? "text" : "password"} 
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        placeholder="Password" 
-                        required
-                    />
-                    <button 
-                        type="button" 
-                        className="toggle-password"
-                        onClick={() => setShowPassword(!showPassword)}
-                    >
-                        {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                    </button>
-                </div>
+      <div className="login-card">
+        <h2>Welcome Back</h2>
 
-                <div className="forgot-password">
-                    <a href="#">Forgot Password?</a>
-                </div>
+        {error && (
+          <div
+            style={{
+              background:'#fee2e2',
+              color:'#ef4444',
+              padding:'12px',
+              borderRadius:'12px',
+              marginBottom:'16px',
+              fontSize:'14px',
+              textAlign:'center',
+              fontWeight:'600'
+            }}
+          >
+            {error}
+          </div>
+        )}
 
-                <button type="submit" className="btn-dark">Log In</button>
-            </form>
-        </div>
+        <form onSubmit={handleSubmit}>
+          <div className="input-group">
+            <AtSign size={20} className="input-icon"/>
 
-        <div className="signup-link">
-            New here? <span onClick={() => navigate('/signup')}>Create an Account</span>
-        </div>
+            <input
+              type="email"
+              value={email}
+              onChange={(e)=>setEmail(e.target.value)}
+              placeholder="Email Address"
+              required
+            />
+          </div>
 
-        <style>{`
-            .login-wrapper {
-                padding: 40px 24px;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                min-height: 100vh;
-                position: relative;
-                z-index: 1;
-            }
-            .logo-section {
-                margin-top: 60px;
-                margin-bottom: 40px;
-                text-align: center;
-            }
-            .logo-circle {
-                width: 90px;
-                height: 90px;
-                background: white;
-                border-radius: 50%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                margin: 0 auto 24px;
-                box-shadow: 0 4px 20px rgba(139, 92, 246, 0.15);
-            }
-            .sparkle-main { margin-top: -4px; margin-right: -4px; }
-            .logo-section h1 {
-                font-size: 28px;
-                color: #33324f;
-                font-weight: 800;
-                margin-bottom: 4px;
-            }
-            .logo-section p {
-                color: #6b7280;
-                font-size: 14px;
-                font-weight: 500;
-            }
+          <div className="input-group">
+            <Lock size={20} className="input-icon"/>
 
-            .login-card {
-                background: white;
-                border-radius: 32px;
-                padding: 32px 24px;
-                width: 100%;
-                box-shadow: var(--shadow);
-            }
-            .login-card h2 {
-                text-align: center;
-                font-size: 20px;
-                color: #33324f;
-                margin-bottom: 24px;
-                font-weight: 700;
-            }
+            <input
+              type={showPassword ? "text":"password"}
+              value={password}
+              onChange={(e)=>setPassword(e.target.value)}
+              placeholder="Password"
+              required
+            />
 
-            .input-group {
-                position: relative;
-                margin-bottom: 16px;
-            }
-            .input-icon {
-                position: absolute;
-                left: 16px;
-                top: 50%;
-                transform: translateY(-50%);
-                color: #9ca3af;
-            }
-            .input-group input {
-                width: 100%;
-                padding: 16px 16px 16px 48px;
-                border-radius: 16px;
-                border: none;
-                background: #f4f3f7;
-                font-size: 15px;
-                outline: none;
-                transition: all 0.2s;
-                font-weight: 500;
-                color: #33324f;
-            }
-            .input-group input:focus {
-                background: white;
-                box-shadow: 0 0 0 2px var(--primary-light);
-            }
-            
-            .toggle-password {
-                position: absolute;
-                right: 16px;
-                top: 50%;
-                transform: translateY(-50%);
-                background: none;
-                border: none;
-                color: #9ca3af;
-                cursor: pointer;
-            }
+            <button
+              type="button"
+              className="toggle-password"
+              onClick={()=>setShowPassword(!showPassword)}
+            >
+              {showPassword
+                ? <EyeOff size={20}/>
+                : <Eye size={20}/>
+              }
+            </button>
+          </div>
 
-            .forgot-password {
-                text-align: right;
-                margin-bottom: 24px;
-            }
-            .forgot-password a {
-                color: var(--primary);
-                text-decoration: none;
-                font-size: 13px;
-                font-weight: 600;
-            }
+          <div className="forgot-password">
+            <a href="#">Forgot Password?</a>
+          </div>
 
-            .btn-dark {
-                width: 100%;
-                padding: 18px;
-                border-radius: 16px;
-                border: none;
-                background: var(--dark-header);
-                color: white;
-                font-size: 16px;
-                font-weight: 600;
-                cursor: pointer;
-                transition: opacity 0.2s;
-            }
-            .btn-dark:active { opacity: 0.8; }
+          <button
+            type="submit"
+            className="btn-dark"
+            disabled={loading}
+          >
+            {loading ? "Logging In..." : "Log In"}
+          </button>
+        </form>
+      </div>
 
-            .signup-link {
-                margin-top: auto;
-                font-size: 14px;
-                color: #6b7280;
-                padding-bottom: 20px;
-            }
-            .signup-link span {
-                color: var(--primary);
-                font-weight: 600;
-                cursor: pointer;
-            }
-        `}</style>
+      <div className="signup-link">
+        New here?
+        <span onClick={()=>navigate('/signup')}>
+          Create an Account
+        </span>
+      </div>
+
+<style>{`
+.login-wrapper{
+padding:40px 24px;
+display:flex;
+flex-direction:column;
+align-items:center;
+min-height:100vh;
+position:relative;
+z-index:1;
+}
+
+.logo-section{
+margin-top:60px;
+margin-bottom:40px;
+text-align:center;
+}
+
+.logo-circle{
+width:90px;
+height:90px;
+background:white;
+border-radius:50%;
+display:flex;
+align-items:center;
+justify-content:center;
+margin:0 auto 24px;
+box-shadow:0 4px 20px rgba(139,92,246,0.15);
+}
+
+.sparkle-main{
+margin-top:-4px;
+margin-right:-4px;
+}
+
+.logo-section h1{
+font-size:28px;
+color:#33324f;
+font-weight:800;
+margin-bottom:4px;
+}
+
+.logo-section p{
+color:#6b7280;
+font-size:14px;
+font-weight:500;
+}
+
+.login-card{
+background:white;
+border-radius:32px;
+padding:32px 24px;
+width:100%;
+box-shadow:var(--shadow);
+}
+
+.login-card h2{
+text-align:center;
+font-size:20px;
+color:#33324f;
+margin-bottom:24px;
+font-weight:700;
+}
+
+.input-group{
+position:relative;
+margin-bottom:16px;
+}
+
+.input-icon{
+position:absolute;
+left:16px;
+top:50%;
+transform:translateY(-50%);
+color:#9ca3af;
+}
+
+.input-group input{
+width:100%;
+padding:16px 16px 16px 48px;
+border-radius:16px;
+border:none;
+background:#f4f3f7;
+font-size:15px;
+outline:none;
+font-weight:500;
+color:#33324f;
+}
+
+.input-group input:focus{
+background:white;
+box-shadow:0 0 0 2px var(--primary-light);
+}
+
+.toggle-password{
+position:absolute;
+right:16px;
+top:50%;
+transform:translateY(-50%);
+background:none;
+border:none;
+cursor:pointer;
+color:#9ca3af;
+}
+
+.forgot-password{
+text-align:right;
+margin-bottom:24px;
+}
+
+.forgot-password a{
+color:var(--primary);
+text-decoration:none;
+font-size:13px;
+font-weight:600;
+}
+
+.btn-dark{
+width:100%;
+padding:18px;
+border-radius:16px;
+border:none;
+background:var(--dark-header);
+color:white;
+font-size:16px;
+font-weight:600;
+cursor:pointer;
+}
+
+.btn-dark:disabled{
+opacity:.6;
+cursor:not-allowed;
+}
+
+.signup-link{
+margin-top:auto;
+font-size:14px;
+color:#6b7280;
+padding-bottom:20px;
+}
+
+.signup-link span{
+color:var(--primary);
+font-weight:600;
+cursor:pointer;
+margin-left:4px;
+}
+`}</style>
+
     </div>
   );
 };

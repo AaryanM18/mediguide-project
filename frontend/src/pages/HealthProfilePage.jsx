@@ -12,6 +12,90 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { registerPatient, getPatientProfile } from '../services/api';
 
+const EMPTY_PROFILE = {
+  name: '',
+  age: '',
+  gender: '',
+  blood_group: '',
+
+  bp_high: false,
+  diabetic: false,
+  sugar_level: '',
+  bp_reading: '',
+
+  existing_conditions: [],
+  other_conditions: '',
+
+  allergies: [],
+  other_allergy: '',
+
+  current_medications: [],
+  other_medication: '',
+
+  family_history: [],
+  other_family_condition: '',
+  other_family_relation: '',
+
+  sleep_quality: '',
+  overthinking_level: '',
+  anger_level: '',
+  appetite_level: '',
+  food_preferences: [],
+  other_food_preference: '',
+  stress_level: '',
+  energy_level: '',
+
+  thermal: '',
+  thirst: '',
+  sleep_pattern: '',
+  mental_state: ''
+};
+
+const conditionCategories = {
+  Metabolic: ['Diabetes', 'Prediabetes', 'Thyroid Disorder', 'Obesity', 'High Cholesterol'],
+  'Blood Pressure / Heart': ['Hypertension', 'Low Blood Pressure', 'Heart Disease', 'Heart Palpitations'],
+  Respiratory: ['Asthma', 'Sinusitis', 'Allergic Rhinitis', 'Bronchitis'],
+  Digestive: ['Acidity', 'Gastritis', 'Constipation', 'IBS', 'Gastric Ulcer'],
+  Skin: ['Psoriasis', 'Eczema', 'Acne', 'Fungal Infection'],
+  'Joint / Body Pain': ['Arthritis', 'Back Pain', 'Joint Pain', 'Spondylitis'],
+  'Mental / Emotional': ['Anxiety', 'Depression', 'Panic Disorder', 'Overthinking', 'Stress Disorder', 'Insomnia'],
+  Neurological: ['Migraine', 'Epilepsy', 'Vertigo', 'Neuropathy'],
+  'Organ-related': ['Kidney Disease', 'Liver Disease', 'Fatty Liver'],
+  'Hormonal / Reproductive': ['PCOS', 'Menstrual Disorder', 'Hormonal Imbalance', 'Infertility'],
+  Other: ['Other']
+};
+
+const allergyOptions = [
+  'Dust', 'Pollen', 'Milk', 'Egg', 'Peanuts', 'Seafood',
+  'Medicine Allergy', 'Cold Weather', 'Heat', 'Strong Smells', 'Other'
+];
+
+const medicationOptions = [
+  'Blood Pressure Medicine', 'Diabetes Medicine', 'Thyroid Medicine',
+  'Asthma Inhaler', 'Painkillers', 'Antibiotics',
+  'Antidepressants', 'Sleeping Pills', 'Other'
+];
+
+const bloodGroupOptions = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
+const genderOptions = ['male', 'female', 'other'];
+const sugarOptions = ['low', 'normal', 'high', 'unknown'];
+
+const sleepOptions = ['Very Poor', 'Poor', 'Normal', 'Good', 'Very Good'];
+const overthinkingOptions = ['Never', 'Rarely', 'Sometimes', 'Often', 'Always'];
+const angerOptions = ['Very Calm', 'Mild', 'Moderate', 'High', 'Extreme'];
+const appetiteOptions = ['Low', 'Normal', 'High', 'Very High'];
+const foodOptions = ['Sweet', 'Spicy', 'Salty', 'Sour', 'Cold Food', 'Hot Food', 'Fried Food', 'Junk Food', 'Other'];
+const stressOptions = ['Low', 'Moderate', 'High', 'Severe'];
+const energyOptions = ['Very Low', 'Low', 'Normal', 'High', 'Very High'];
+
+const hereditaryConditions = [
+  'Diabetes', 'Hypertension', 'Heart Disease', 'Cancer',
+  'Thyroid Disorder', 'Asthma', 'Arthritis',
+  'Kidney Disease', 'Mental Illness', 'Other'
+];
+
+const relations = ['Father', 'Mother', 'Both Parents', 'Grandparents', 'Sibling', 'Other'];
+
 const HealthProfilePage = ({ user }) => {
   const navigate = useNavigate();
 
@@ -19,182 +103,15 @@ const HealthProfilePage = ({ user }) => {
   const [saving, setSaving] = useState(false);
 
   const [formData, setFormData] = useState({
-    name: user?.name || '',
-    age: 21,
-    gender: 'male',
-    blood_group: 'O+',
-
-    bp_high: false,
-    diabetic: false,
-    sugar_level: 'normal',
-    bp_reading: '',
-
-    existing_conditions: [],
-    other_conditions: '',
-
-    allergies: [],
-    other_allergy: '',
-
-    current_medications: [],
-    other_medication: '',
-
-    family_history: [],
-    other_family_condition: '',
-    other_family_relation: '',
-
-    sleep_quality: '',
-    overthinking_level: '',
-    anger_level: '',
-    appetite_level: '',
-    food_preferences: [],
-    other_food_preference: '',
-    stress_level: '',
-    energy_level: '',
-
-    thermal: '',
-    thirst: '',
-    sleep_pattern: '',
-    mental_state: ''
-  });
-
-  const conditionCategories = {
-    Metabolic: [
-      'Diabetes',
-      'Prediabetes',
-      'Thyroid Disorder',
-      'Obesity',
-      'High Cholesterol'
-    ],
-    'Blood Pressure / Heart': [
-      'Hypertension',
-      'Low Blood Pressure',
-      'Heart Disease',
-      'Heart Palpitations'
-    ],
-    Respiratory: [
-      'Asthma',
-      'Sinusitis',
-      'Allergic Rhinitis',
-      'Bronchitis'
-    ],
-    Digestive: [
-      'Acidity',
-      'Gastritis',
-      'Constipation',
-      'IBS',
-      'Gastric Ulcer'
-    ],
-    Skin: [
-      'Psoriasis',
-      'Eczema',
-      'Acne',
-      'Fungal Infection'
-    ],
-    'Joint / Body Pain': [
-      'Arthritis',
-      'Back Pain',
-      'Joint Pain',
-      'Spondylitis'
-    ],
-    'Mental / Emotional': [
-      'Anxiety',
-      'Depression',
-      'Panic Disorder',
-      'Overthinking',
-      'Stress Disorder',
-      'Insomnia'
-    ],
-    Neurological: [
-      'Migraine',
-      'Epilepsy',
-      'Vertigo',
-      'Neuropathy'
-    ],
-    'Organ-related': [
-      'Kidney Disease',
-      'Liver Disease',
-      'Fatty Liver'
-    ],
-    'Hormonal / Reproductive': [
-      'PCOS',
-      'Menstrual Disorder',
-      'Hormonal Imbalance',
-      'Infertility'
-    ],
-    Other: ['Other']
-  };
-
-  const allergyOptions = [
-    'Dust',
-    'Pollen',
-    'Milk',
-    'Egg',
-    'Peanuts',
-    'Seafood',
-    'Medicine Allergy',
-    'Cold Weather',
-    'Heat',
-    'Strong Smells',
-    'Other'
-  ];
-
-  const medicationOptions = [
-    'Blood Pressure Medicine',
-    'Diabetes Medicine',
-    'Thyroid Medicine',
-    'Asthma Inhaler',
-    'Painkillers',
-    'Antibiotics',
-    'Antidepressants',
-    'Sleeping Pills',
-    'Other'
-  ];
-
-  const sleepOptions = ['Very Poor', 'Poor', 'Normal', 'Good', 'Very Good'];
-  const overthinkingOptions = ['Never', 'Rarely', 'Sometimes', 'Often', 'Always'];
-  const angerOptions = ['Very Calm', 'Mild', 'Moderate', 'High', 'Extreme'];
-  const appetiteOptions = ['Low', 'Normal', 'High', 'Very High'];
-
-  const foodOptions = [
-    'Sweet',
-    'Spicy',
-    'Salty',
-    'Sour',
-    'Cold Food',
-    'Hot Food',
-    'Fried Food',
-    'Junk Food',
-    'Other'
-  ];
-
-  const stressOptions = ['Low', 'Moderate', 'High', 'Severe'];
-  const energyOptions = ['Very Low', 'Low', 'Normal', 'High', 'Very High'];
-
-  const hereditaryConditions = [
-    'Diabetes',
-    'Hypertension',
-    'Heart Disease',
-    'Cancer',
-    'Thyroid Disorder',
-    'Asthma',
-    'Arthritis',
-    'Kidney Disease',
-    'Mental Illness',
-    'Other'
-  ];
-
-  const relations = [
-    'Father',
-    'Mother',
-    'Both Parents',
-    'Grandparents',
-    'Sibling',
-    'Other'
-  ];
+  ...EMPTY_PROFILE,
+  name: user?.name || '',
+  age: user?.age || '',
+  gender: user?.gender || ''
+});
 
   useEffect(() => {
     if (user?.id) fetchProfile();
-  }, [user]);
+  }, [user?.id]);
 
   const safeArray = (value) => (Array.isArray(value) ? value : []);
 
@@ -207,14 +124,15 @@ const HealthProfilePage = ({ user }) => {
         const p = response.patient;
 
         setFormData({
-          name: p.name || '',
-          age: p.age || 21,
-          gender: p.gender || 'male',
-          blood_group: p.blood_group || 'O+',
+          ...EMPTY_PROFILE,
+          name: p.name || user?.name || '',
+          age: p.age || user?.age || '',
+          gender: p.gender || user?.gender || '',
+          blood_group: p.blood_group || '',
 
           bp_high: !!p.bp_high,
           diabetic: !!p.diabetic,
-          sugar_level: p.sugar_level || 'normal',
+          sugar_level: p.sugar_level || '',
           bp_reading: p.bp_reading || '',
 
           existing_conditions: safeArray(p.existing_conditions),
@@ -268,7 +186,7 @@ const HealthProfilePage = ({ user }) => {
       (item) => item.condition !== condition
     );
 
-    if (!relation) {
+    if (relation === null) {
       setFormData({ ...formData, family_history: filtered });
       return;
     }
@@ -279,13 +197,26 @@ const HealthProfilePage = ({ user }) => {
     });
   };
 
+  const parseSaveError = (err) => {
+    if (!err) return 'Profile save failed.';
+    if (typeof err === 'string') return err;
+    if (err.message) return err.message;
+    if (Array.isArray(err.detail)) {
+      return err.detail.map((e) => e.msg || JSON.stringify(e)).join(', ');
+    }
+    if (typeof err.detail === 'string') return err.detail;
+    return 'Profile save failed.';
+  };
+
   const handleSave = async () => {
     try {
       setSaving(true);
 
       const payload = {
         ...formData,
-        user_id: user.id
+        user_id: user.id,
+        name: formData.name.trim(),
+        age: formData.age ? Number(formData.age) : null
       };
 
       const response = await registerPatient(payload);
@@ -295,13 +226,10 @@ const HealthProfilePage = ({ user }) => {
         alert('Profile saved successfully!');
         navigate('/');
       } else {
-        throw new Error(
-          response.message ||
-            (response.detail ? JSON.stringify(response.detail) : 'Unknown backend error')
-        );
+        throw response;
       }
     } catch (err) {
-      alert(`Failed to save profile: ${err.message || 'Network error'}`);
+      alert(parseSaveError(err));
       console.error(err);
     } finally {
       setSaving(false);
@@ -349,7 +277,7 @@ const HealthProfilePage = ({ user }) => {
                 className="input-field"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                placeholder="Patient Name"
+                placeholder="Enter full name"
               />
             </div>
           </div>
@@ -363,24 +291,68 @@ const HealthProfilePage = ({ user }) => {
                   type="number"
                   className="input-field"
                   value={formData.age}
-                  onChange={(e) =>
-                    setFormData({ ...formData, age: parseInt(e.target.value) || 0 })
-                  }
+                  min="1"
+                  max="120"
+                  onChange={(e) => setFormData({ ...formData, age: e.target.value })}
+                  placeholder="Enter age"
                 />
               </div>
             </div>
 
+            <SelectBox
+              label="Gender"
+              field="gender"
+              options={genderOptions}
+              formData={formData}
+              setFormData={setFormData}
+            />
+          </div>
+
+          <div className="input-row top-gap">
+            <SelectBox
+              label="Blood Group"
+              field="blood_group"
+              options={bloodGroupOptions}
+              formData={formData}
+              setFormData={setFormData}
+            />
+
+            <SelectBox
+              label="Sugar Level"
+              field="sugar_level"
+              options={sugarOptions}
+              formData={formData}
+              setFormData={setFormData}
+            />
+          </div>
+
+          <div className="input-row top-gap">
             <div className="input-group half">
-              <label>Gender</label>
-              <select
+              <label>BP Reading</label>
+              <input
+                type="text"
                 className="input-field"
-                value={formData.gender}
-                onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
+                value={formData.bp_reading}
+                onChange={(e) => setFormData({ ...formData, bp_reading: e.target.value })}
+                placeholder="e.g. 120/80"
+              />
+            </div>
+
+            <div className="toggle-row half-toggle">
+              <button
+                type="button"
+                className={`toggle-btn ${formData.bp_high ? 'active' : ''}`}
+                onClick={() => setFormData({ ...formData, bp_high: !formData.bp_high })}
               >
-                <option value="male">Male</option>
-                <option value="female">Female</option>
-                <option value="other">Other</option>
-              </select>
+                High BP
+              </button>
+              <button
+                type="button"
+                className={`toggle-btn ${formData.diabetic ? 'active' : ''}`}
+                onClick={() => setFormData({ ...formData, diabetic: !formData.diabetic })}
+              >
+                Diabetic
+              </button>
             </div>
           </div>
         </section>
@@ -399,9 +371,7 @@ const HealthProfilePage = ({ user }) => {
                   <button
                     type="button"
                     key={condition}
-                    className={`condition-tag ${
-                      formData.existing_conditions.includes(condition) ? 'active' : ''
-                    }`}
+                    className={`condition-tag ${formData.existing_conditions.includes(condition) ? 'active' : ''}`}
                     onClick={() => toggleArrayValue('existing_conditions', condition)}
                   >
                     {condition}
@@ -412,20 +382,12 @@ const HealthProfilePage = ({ user }) => {
           ))}
 
           {formData.existing_conditions.includes('Other') && (
-            <div className="input-group top-gap">
-              <label>Other Conditions</label>
-              <div className="other-input-box">
-                <Edit2 size={20} color="#8b5cf6" />
-                <textarea
-                  className="other-textarea"
-                  value={formData.other_conditions}
-                  onChange={(e) =>
-                    setFormData({ ...formData, other_conditions: e.target.value })
-                  }
-                  placeholder="Enter other condition"
-                />
-              </div>
-            </div>
+            <TextAreaField
+              label="Other Conditions"
+              value={formData.other_conditions}
+              onChange={(value) => setFormData({ ...formData, other_conditions: value })}
+              placeholder="Enter other condition"
+            />
           )}
         </section>
 
@@ -446,7 +408,9 @@ const HealthProfilePage = ({ user }) => {
                   type="button"
                   className={`condition-tag ${selected ? 'active' : ''}`}
                   onClick={() =>
-                    updateFamilyHistory(condition, selected ? '' : 'Father')
+                    selected
+                      ? updateFamilyHistory(condition, null)
+                      : updateFamilyHistory(condition, '')
                   }
                 >
                   {condition}
@@ -458,6 +422,7 @@ const HealthProfilePage = ({ user }) => {
                     value={selected.relation}
                     onChange={(e) => updateFamilyHistory(condition, e.target.value)}
                   >
+                    <option value="">Select relation</option>
                     {relations.map((relation) => (
                       <option key={relation} value={relation}>
                         {relation}
@@ -470,39 +435,21 @@ const HealthProfilePage = ({ user }) => {
           })}
 
           {formData.family_history.some((item) => item.condition === 'Other') && (
-            <div className="input-group top-gap">
-              <label>Other Family Condition</label>
-              <input
-                type="text"
-                className="input-field"
-                value={formData.other_family_condition}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    other_family_condition: e.target.value
-                  })
-                }
-                placeholder="Enter other hereditary condition"
-              />
-            </div>
+            <InputField
+              label="Other Family Condition"
+              value={formData.other_family_condition}
+              onChange={(value) => setFormData({ ...formData, other_family_condition: value })}
+              placeholder="Enter other hereditary condition"
+            />
           )}
 
           {formData.family_history.some((item) => item.relation === 'Other') && (
-            <div className="input-group top-gap">
-              <label>Other Relation</label>
-              <input
-                type="text"
-                className="input-field"
-                value={formData.other_family_relation}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    other_family_relation: e.target.value
-                  })
-                }
-                placeholder="Enter relation"
-              />
-            </div>
+            <InputField
+              label="Other Relation"
+              value={formData.other_family_relation}
+              onChange={(value) => setFormData({ ...formData, other_family_relation: value })}
+              placeholder="Enter relation"
+            />
           )}
         </section>
 
@@ -534,9 +481,7 @@ const HealthProfilePage = ({ user }) => {
                 <button
                   type="button"
                   key={food}
-                  className={`condition-tag ${
-                    formData.food_preferences.includes(food) ? 'active' : ''
-                  }`}
+                  className={`condition-tag ${formData.food_preferences.includes(food) ? 'active' : ''}`}
                   onClick={() => toggleArrayValue('food_preferences', food)}
                 >
                   {food}
@@ -546,97 +491,52 @@ const HealthProfilePage = ({ user }) => {
           </div>
 
           {formData.food_preferences.includes('Other') && (
-            <div className="input-group top-gap">
-              <label>Other Food Preference</label>
-              <input
-                type="text"
-                className="input-field"
-                value={formData.other_food_preference}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    other_food_preference: e.target.value
-                  })
-                }
-                placeholder="Enter other food preference"
-              />
-            </div>
+            <InputField
+              label="Other Food Preference"
+              value={formData.other_food_preference}
+              onChange={(value) => setFormData({ ...formData, other_food_preference: value })}
+              placeholder="Enter other food preference"
+            />
           )}
         </section>
 
-        <section className="form-section">
-          <div className="section-title">
-            <AlertCircle size={20} className="section-icon" />
-            <h3>Allergies</h3>
-          </div>
+        <MultiSelectSection
+          title="Allergies"
+          icon={<AlertCircle size={20} className="section-icon" />}
+          options={allergyOptions}
+          values={formData.allergies}
+          onToggle={(value) => toggleArrayValue('allergies', value)}
+        />
 
-          <div className="conditions-grid">
-            {allergyOptions.map((allergy) => (
-              <button
-                type="button"
-                key={allergy}
-                className={`condition-tag ${
-                  formData.allergies.includes(allergy) ? 'active' : ''
-                }`}
-                onClick={() => toggleArrayValue('allergies', allergy)}
-              >
-                {allergy}
-              </button>
-            ))}
-          </div>
+        {formData.allergies.includes('Other') && (
+          <section className="form-section">
+            <InputField
+              label="Other Allergy"
+              value={formData.other_allergy}
+              onChange={(value) => setFormData({ ...formData, other_allergy: value })}
+              placeholder="Enter other allergy"
+            />
+          </section>
+        )}
 
-          {formData.allergies.includes('Other') && (
-            <div className="input-group top-gap">
-              <label>Other Allergy</label>
-              <input
-                type="text"
-                className="input-field"
-                value={formData.other_allergy}
-                onChange={(e) =>
-                  setFormData({ ...formData, other_allergy: e.target.value })
-                }
-                placeholder="Enter other allergy"
-              />
-            </div>
-          )}
-        </section>
+        <MultiSelectSection
+          title="Current Medications"
+          icon={<AlertCircle size={20} className="section-icon" />}
+          options={medicationOptions}
+          values={formData.current_medications}
+          onToggle={(value) => toggleArrayValue('current_medications', value)}
+        />
 
-        <section className="form-section">
-          <div className="section-title">
-            <AlertCircle size={20} className="section-icon" />
-            <h3>Current Medications</h3>
-          </div>
-
-          <div className="conditions-grid">
-            {medicationOptions.map((medicine) => (
-              <button
-                type="button"
-                key={medicine}
-                className={`condition-tag ${
-                  formData.current_medications.includes(medicine) ? 'active' : ''
-                }`}
-                onClick={() => toggleArrayValue('current_medications', medicine)}
-              >
-                {medicine}
-              </button>
-            ))}
-          </div>
-
-          {formData.current_medications.includes('Other') && (
-            <div className="input-group top-gap">
-              <label>Other Medication</label>
-              <input
-                type="text"
-                className="input-field"
-                value={formData.other_medication}
-                onChange={(e) =>
-                  setFormData({ ...formData, other_medication: e.target.value })
-                }
-                placeholder="Enter other medication"
-              />
-            </div>
-          )}
-        </section>
+        {formData.current_medications.includes('Other') && (
+          <section className="form-section">
+            <InputField
+              label="Other Medication"
+              value={formData.other_medication}
+              onChange={(value) => setFormData({ ...formData, other_medication: value })}
+              placeholder="Enter other medication"
+            />
+          </section>
+        )}
 
         <section className="form-section">
           <div className="section-title">
@@ -647,59 +547,39 @@ const HealthProfilePage = ({ user }) => {
           <div className="questionnaire-group">
             <label className="q-label">Thermal Preferences</label>
             <div className="toggle-row">
-              <button
-                type="button"
-                className={`toggle-btn ${formData.thermal === 'Chilly' ? 'active' : ''}`}
-                onClick={() => setFormData({ ...formData, thermal: 'Chilly' })}
-              >
-                Chilly
-              </button>
-
-              <button
-                type="button"
-                className={`toggle-btn ${formData.thermal === 'Hot' ? 'active' : ''}`}
-                onClick={() => setFormData({ ...formData, thermal: 'Hot' })}
-              >
-                Hot
-              </button>
+              {['Chilly', 'Hot'].map((value) => (
+                <button
+                  key={value}
+                  type="button"
+                  className={`toggle-btn ${formData.thermal === value ? 'active' : ''}`}
+                  onClick={() => setFormData({ ...formData, thermal: value })}
+                >
+                  {value}
+                </button>
+              ))}
             </div>
           </div>
 
-          <div className="questionnaire-group">
-            <label className="q-label">Thirst</label>
-            <input
-              type="text"
-              className="input-field"
-              value={formData.thirst}
-              onChange={(e) => setFormData({ ...formData, thirst: e.target.value })}
-              placeholder="e.g. Thirsty for cold water"
-            />
-          </div>
+          <InputField
+            label="Thirst"
+            value={formData.thirst}
+            onChange={(value) => setFormData({ ...formData, thirst: value })}
+            placeholder="Describe thirst pattern"
+          />
 
-          <div className="questionnaire-group">
-            <label className="q-label">Sleep Pattern / Dreams</label>
-            <textarea
-              className="input-field q-textarea"
-              value={formData.sleep_pattern}
-              onChange={(e) =>
-                setFormData({ ...formData, sleep_pattern: e.target.value })
-              }
-              placeholder="Describe sleep pattern or recurring dreams"
-            />
-          </div>
+          <TextAreaField
+            label="Sleep Pattern / Dreams"
+            value={formData.sleep_pattern}
+            onChange={(value) => setFormData({ ...formData, sleep_pattern: value })}
+            placeholder="Describe sleep pattern or recurring dreams"
+          />
 
-          <div className="questionnaire-group">
-            <label className="q-label">Mental State</label>
-            <input
-              type="text"
-              className="input-field"
-              value={formData.mental_state}
-              onChange={(e) =>
-                setFormData({ ...formData, mental_state: e.target.value })
-              }
-              placeholder="e.g. Calm, anxious, quick-tempered"
-            />
-          </div>
+          <InputField
+            label="Mental State"
+            value={formData.mental_state}
+            onChange={(value) => setFormData({ ...formData, mental_state: value })}
+            placeholder="Describe current mental state"
+          />
         </section>
 
         <button
@@ -711,330 +591,327 @@ const HealthProfilePage = ({ user }) => {
         </button>
       </div>
 
-      <style>{`
-        .health-profile-container { padding-bottom: 40px; }
-
-        .health-header {
-          height: 240px;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          border-bottom-left-radius: 40px;
-          border-bottom-right-radius: 40px;
-          position: relative;
-          background: var(--dark-header);
-        }
-
-        .back-btn {
-          position: absolute;
-          top: 60px;
-          left: 20px;
-          background: none;
-          border: none;
-          cursor: pointer;
-        }
-
-        .health-header-content {
-          text-align: center;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 12px;
-        }
-
-        .health-header-content p {
-          color: rgba(255,255,255,0.8);
-          font-size: 14px;
-        }
-
-        .shield-icon {
-          width: 70px;
-          height: 80px;
-          position: relative;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          opacity: 0.9;
-        }
-
-        .shield-plus {
-          position: absolute;
-          font-size: 24px;
-          font-weight: bold;
-          color: rgba(139, 92, 246, 0.6);
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-          z-index: 10;
-        }
-
-        .health-header h1 {
-          font-size: 28px;
-          color: white;
-          font-weight: 700;
-        }
-
-        .health-body { padding: 24px; }
-
-        .form-section {
-          margin-bottom: 32px;
-          padding: 24px;
-          background: white;
-          border-radius: 24px;
-          border: none;
-          box-shadow: var(--shadow);
-        }
-
-        .section-title {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          margin-bottom: 20px;
-        }
-
-        .section-icon { color: var(--primary); }
-
-        .section-title h3 {
-          font-size: 16px;
-          color: #2F2E41;
-        }
-
-        .input-row {
-          display: flex;
-          gap: 16px;
-        }
-
-        .input-group {
-          flex: 1;
-          display: flex;
-          flex-direction: column;
-          gap: 8px;
-        }
-
-        .input-group label {
-          font-size: 13px;
-          color: #9ca3af;
-          font-weight: 600;
-        }
-
-        .input-with-icon {
-          position: relative;
-          display: flex;
-          align-items: center;
-        }
-
-        .input-with-icon svg {
-          position: absolute;
-          left: 16px;
-          color: #9ca3af;
-        }
-
-        .input-with-icon .input-field { padding-left: 48px; }
-
-        .input-field {
-          padding: 16px;
-          border-radius: 16px;
-          border: none;
-          background: #f4f3f7;
-          font-size: 15px;
-          outline: none;
-          transition: all 0.2s;
-          font-weight: 500;
-          color: #33324f;
-          width: 100%;
-          box-sizing: border-box;
-        }
-
-        .input-field:focus {
-          background: white;
-          box-shadow: 0 0 0 2px var(--primary-light);
-        }
-
-        .conditions-grid {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 10px;
-        }
-
-        .condition-tag {
-          padding: 12px 18px;
-          border-radius: 16px;
-          border: none;
-          background: #f4f3f7;
-          font-size: 14px;
-          font-weight: 600;
-          color: #4b5563;
-          cursor: pointer;
-          transition: all 0.2s;
-        }
-
-        .condition-tag.active {
-          background: var(--primary);
-          color: white;
-          box-shadow: 0 4px 10px rgba(139, 92, 246, 0.4);
-        }
-
-        .option-category {
-          margin-bottom: 18px;
-        }
-
-        .option-category h4 {
-          font-size: 14px;
-          color: #2F2E41;
-          margin-bottom: 10px;
-          font-weight: 800;
-        }
-
-        .family-history-item {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          margin-bottom: 12px;
-          flex-wrap: wrap;
-        }
-
-        .relation-select {
-          max-width: 220px;
-          padding: 12px;
-        }
-
-        .other-input-box {
-          background: #f4f3f7;
-          border-radius: 16px;
-          padding: 16px;
-          display: flex;
-          gap: 12px;
-        }
-
-        .other-textarea {
-          flex: 1;
-          background: none;
-          border: none;
-          resize: none;
-          height: 80px;
-          outline: none;
-          font-family: inherit;
-          font-size: 14px;
-          color: #2F2E41;
-        }
-
-        .questionnaire-group { margin-bottom: 24px; }
-
-        .q-label {
-          font-size: 15px;
-          font-weight: 800;
-          color: #2F2E41;
-          display: block;
-          margin-bottom: 6px;
-        }
-
-        .q-textarea {
-          min-height: 80px;
-          background: #F9FAFB;
-          border: 1px solid #E5E7EB;
-          border-radius: 16px;
-          padding: 14px;
-          width: 100%;
-          box-sizing: border-box;
-        }
-
-        .toggle-row {
-          display: flex;
-          gap: 8px;
-        }
-
-        .toggle-btn {
-          flex: 1;
-          padding: 12px;
-          border-radius: 14px;
-          border: 1px solid #E5E7EB;
-          background: #F9FAFB;
-          font-size: 13px;
-          font-weight: 700;
-          color: #4b5563;
-          cursor: pointer;
-          transition: all 0.2s;
-        }
-
-        .toggle-btn.active {
-          background: #8B5CF6;
-          color: white;
-          border-color: #8B5CF6;
-          box-shadow: 0 4px 12px rgba(139, 92, 246, 0.2);
-        }
-
-        .top-gap { margin-top: 16px; }
-
-        .next-btn {
-          height: 60px;
-          border-radius: 20px;
-          font-size: 16px;
-          margin-top: 10px;
-          width: 100%;
-          background: var(--dark-header);
-          color: white;
-          border: none;
-          font-weight: 700;
-          cursor: pointer;
-        }
-
-        .next-btn:disabled {
-          opacity: 0.6;
-          cursor: not-allowed;
-        }
-
-        .loading-screen {
-          height: 100vh;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          gap: 20px;
-          color: #9ca3af;
-        }
-
-        .spinner {
-          width: 40px;
-          height: 40px;
-          border: 4px solid #f3f4f6;
-          border-top: 4px solid var(--primary);
-          border-radius: 50%;
-          animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-      `}</style>
+      <style>{styles}</style>
     </div>
   );
 };
 
-const SelectBox = ({ label, field, options, formData, setFormData }) => {
-  return (
-    <div className="input-group half">
-      <label>{label}</label>
-      <select
-        className="input-field"
-        value={formData[field]}
-        onChange={(e) =>
-          setFormData({
-            ...formData,
-            [field]: e.target.value
-          })
-        }
-      >
-        <option value="">Select</option>
-        {options.map((option) => (
-          <option key={option} value={option}>
-            {option}
-          </option>
-        ))}
-      </select>
+const SelectBox = ({ label, field, options, formData, setFormData }) => (
+  <div className="input-group half">
+    <label>{label}</label>
+    <select
+      className="input-field"
+      value={formData[field]}
+      onChange={(e) => setFormData({ ...formData, [field]: e.target.value })}
+    >
+      <option value="">Select</option>
+      {options.map((option) => (
+        <option key={option} value={option}>
+          {option}
+        </option>
+      ))}
+    </select>
+  </div>
+);
+
+const InputField = ({ label, value, onChange, placeholder }) => (
+  <div className="input-group top-gap">
+    <label>{label}</label>
+    <input
+      type="text"
+      className="input-field"
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      placeholder={placeholder}
+    />
+  </div>
+);
+
+const TextAreaField = ({ label, value, onChange, placeholder }) => (
+  <div className="input-group top-gap">
+    <label>{label}</label>
+    <div className="other-input-box">
+      <Edit2 size={20} color="#8b5cf6" />
+      <textarea
+        className="other-textarea"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+      />
     </div>
-  );
-};
+  </div>
+);
+
+const MultiSelectSection = ({ title, icon, options, values, onToggle }) => (
+  <section className="form-section">
+    <div className="section-title">
+      {icon}
+      <h3>{title}</h3>
+    </div>
+
+    <div className="conditions-grid">
+      {options.map((option) => (
+        <button
+          type="button"
+          key={option}
+          className={`condition-tag ${values.includes(option) ? 'active' : ''}`}
+          onClick={() => onToggle(option)}
+        >
+          {option}
+        </button>
+      ))}
+    </div>
+  </section>
+);
+
+const styles = `
+.health-profile-container { padding-bottom: 40px; }
+.health-header {
+  height: 240px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-bottom-left-radius: 40px;
+  border-bottom-right-radius: 40px;
+  position: relative;
+  background: var(--dark-header);
+}
+.back-btn {
+  position: absolute;
+  top: 60px;
+  left: 20px;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+.health-header-content {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+.health-header-content p {
+  color: rgba(255,255,255,0.8);
+  font-size: 14px;
+}
+.shield-icon {
+  width: 70px;
+  height: 80px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.9;
+}
+.shield-plus {
+  position: absolute;
+  font-size: 24px;
+  font-weight: bold;
+  color: rgba(139, 92, 246, 0.6);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+}
+.health-header h1 {
+  font-size: 28px;
+  color: white;
+  font-weight: 700;
+}
+.health-body { padding: 24px; }
+.form-section {
+  margin-bottom: 32px;
+  padding: 24px;
+  background: white;
+  border-radius: 24px;
+  border: none;
+  box-shadow: var(--shadow);
+}
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.section-icon { color: var(--primary); }
+.section-title h3 {
+  font-size: 16px;
+  color: #2F2E41;
+}
+.input-row {
+  display: flex;
+  gap: 16px;
+}
+.input-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.input-group label {
+  font-size: 13px;
+  color: #9ca3af;
+  font-weight: 600;
+}
+.input-with-icon {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.input-with-icon svg {
+  position: absolute;
+  left: 16px;
+  color: #9ca3af;
+}
+.input-with-icon .input-field { padding-left: 48px; }
+.input-field {
+  padding: 16px;
+  border-radius: 16px;
+  border: none;
+  background: #f4f3f7;
+  font-size: 15px;
+  outline: none;
+  transition: all 0.2s;
+  font-weight: 500;
+  color: #33324f;
+  width: 100%;
+  box-sizing: border-box;
+}
+.input-field:focus {
+  background: white;
+  box-shadow: 0 0 0 2px var(--primary-light);
+}
+.conditions-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.condition-tag {
+  padding: 12px 18px;
+  border-radius: 16px;
+  border: none;
+  background: #f4f3f7;
+  font-size: 14px;
+  font-weight: 600;
+  color: #4b5563;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.condition-tag.active {
+  background: var(--primary);
+  color: white;
+  box-shadow: 0 4px 10px rgba(139, 92, 246, 0.4);
+}
+.option-category { margin-bottom: 18px; }
+.option-category h4 {
+  font-size: 14px;
+  color: #2F2E41;
+  margin-bottom: 10px;
+  font-weight: 800;
+}
+.family-history-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+.relation-select {
+  max-width: 220px;
+  padding: 12px;
+}
+.other-input-box {
+  background: #f4f3f7;
+  border-radius: 16px;
+  padding: 16px;
+  display: flex;
+  gap: 12px;
+}
+.other-textarea {
+  flex: 1;
+  background: none;
+  border: none;
+  resize: none;
+  height: 80px;
+  outline: none;
+  font-family: inherit;
+  font-size: 14px;
+  color: #2F2E41;
+}
+.questionnaire-group { margin-bottom: 24px; }
+.q-label {
+  font-size: 15px;
+  font-weight: 800;
+  color: #2F2E41;
+  display: block;
+  margin-bottom: 6px;
+}
+.toggle-row {
+  display: flex;
+  gap: 8px;
+}
+.half-toggle {
+  flex: 1;
+  align-items: flex-end;
+}
+.toggle-btn {
+  flex: 1;
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px solid #E5E7EB;
+  background: #F9FAFB;
+  font-size: 13px;
+  font-weight: 700;
+  color: #4b5563;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.toggle-btn.active {
+  background: #8B5CF6;
+  color: white;
+  border-color: #8B5CF6;
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.2);
+}
+.top-gap { margin-top: 16px; }
+.next-btn {
+  height: 60px;
+  border-radius: 20px;
+  font-size: 16px;
+  margin-top: 10px;
+  width: 100%;
+  background: var(--dark-header);
+  color: white;
+  border: none;
+  font-weight: 700;
+  cursor: pointer;
+}
+.next-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.loading-screen {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  color: #9ca3af;
+}
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f4f6;
+  border-top: 4px solid var(--primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+`;
 
 export default HealthProfilePage;
