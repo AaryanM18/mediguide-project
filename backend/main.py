@@ -53,13 +53,16 @@ def health():
 
 @app.post("/api/auth/signup")
 def signup(user: UserSignup):
-    create_user(
-        user.email,
-        user.password
-    )
+    user_id = create_user(
+    user.user_id,
+    user.email,
+    user.password
+)
 
     return {
         "success": True,
+        "user_id": user_id,
+        "email": user.email,
         "message": "Signup successful"
     }
 

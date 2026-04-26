@@ -42,7 +42,7 @@ def init_db():
 
     conn.execute("""
         CREATE TABLE IF NOT EXISTS consultations (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id TEXT PRIMARY KEY,
             user_id TEXT,
             symptom TEXT,
             severity TEXT,
@@ -56,7 +56,7 @@ def init_db():
 
     conn.execute("""
          CREATE TABLE IF NOT EXISTS users (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                id TEXT PRIMARY KEY,
                 email TEXT UNIQUE,
                 password TEXT
         )

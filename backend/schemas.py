@@ -6,6 +6,7 @@ class FamilyHistoryItem(BaseModel):
     relation: str
 
 class UserSignup(BaseModel):
+    user_id: str
     email: str
     password: str
 
