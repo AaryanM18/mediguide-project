@@ -1,0 +1,103 @@
+{
+    "General & Mental": [
+      "Anxiety",
+      "Anxiety (children)",
+      "Depression",
+      "Mind"
+    ],
+    "Sleep Disorders": [
+      "Insomnia",
+      "Sleep"
+    ],
+    "Fever & Infection": [
+      "Fever",
+      "Fever (child)",
+      "Dengue fever",
+      "Typhoid fever",
+      "Cold and flu"
+    ],
+    "Head & Pain Disorders": [
+      "Headache",
+      "Head",
+      "Back pain",
+      "Back",
+      "Joint pain",
+      "Chest pain",
+      "Stomach pain",
+      "Abdomen"
+    ],
+    "Respiratory": [
+      "Cough",
+      "Respiratory",
+      "Shortness of breath",
+      "Sore throat",
+      "Throat",
+      "Runny nose",
+      "Nose"
+    ],
+    "Lifestyle Diseases": [
+      "Blood pressure high",
+      "Blood sugar high",
+      "Blood sugar low",
+      "Thyroid problems"
+    ],
+    "Digestive System": [
+      "Stomach",
+      "Constipation",
+      "Diarrhoea",
+      "Vomiting",
+      "Nausea",
+      "Rectum",
+      "Stool",
+      "Cholera / gastric emergency",
+      "Worms / parasites"
+    ],
+    "Organ Disorders": [
+      "Liver problems",
+      "Kidney problems",
+      "Heart"
+    ],
+    "Sensory Organs": [
+      "Eyes",
+      "Ears",
+      "Face",
+      "Mouth"
+    ],
+    "Musculoskeletal": [
+      "Extremities",
+      "Joint pain",
+      "Back pain"
+    ],
+    "Female Health": [
+      "Female",
+      "Menstrual pain",
+      "Menopausal symptoms"
+    ],
+    "Male Health": [
+      "Male",
+      "Sexual weakness"
+    ],
+    "Skin & External": [
+      "Acne",
+      "Eczema",
+      "Psoriasis",
+      "Skin",
+      "Skin rash",
+      "Wounds and bruises"
+    ],
+    "Neurological": [
+      "Dizziness",
+      "Epilepsy / convulsions",
+      "Paralysis / nerve weakness"
+    ],
+    "Recovery & Weakness": [
+      "Fatigue",
+      "Weakness after illness",
+      "Swollen glands",
+      "Teething"
+    ],
+    "Urinary System": [
+      "Urinary",
+      "Urinary problems"
+    ]
+  }

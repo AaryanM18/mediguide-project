@@ -1,0 +1,295 @@
+
+{
+    "anxiety": {
+      "category": "General & Mental",
+      "subcategory": "Anxiety"
+    },
+    "panic attack": {
+      "category": "General & Mental",
+      "subcategory": "Anxiety"
+    },
+    "depression": {
+      "category": "General & Mental",
+      "subcategory": "Depression"
+    },
+    "sadness": {
+      "category": "General & Mental",
+      "subcategory": "Depression"
+    },
+    "stress": {
+      "category": "General & Mental",
+      "subcategory": "Stress"
+    },
+    "overthinking": {
+      "category": "General & Mental",
+      "subcategory": "Stress"
+    },
+    "insomnia": {
+      "category": "Sleep Disorders",
+      "subcategory": "Insomnia"
+    },
+    "disturbed sleep": {
+      "category": "Sleep Disorders",
+      "subcategory": "Sleep"
+    },
+    "sleeplessness": {
+      "category": "Sleep Disorders",
+      "subcategory": "Sleep"
+    },
+    "fever": {
+      "category": "Fever & Infection",
+      "subcategory": "Fever"
+    },
+    "high fever": {
+      "category": "Fever & Infection",
+      "subcategory": "Fever"
+    },
+    "cold": {
+      "category": "Fever & Infection",
+      "subcategory": "Cold and flu"
+    },
+    "flu": {
+      "category": "Fever & Infection",
+      "subcategory": "Cold and flu"
+    },
+    "dengue": {
+      "category": "Fever & Infection",
+      "subcategory": "Dengue fever"
+    },
+    "typhoid": {
+      "category": "Fever & Infection",
+      "subcategory": "Typhoid fever"
+    },
+    "headache": {
+      "category": "Head & Pain Disorders",
+      "subcategory": "Headache"
+    },
+    "migraine": {
+      "category": "Neurological",
+      "subcategory": "Migraine"
+    },
+    "back pain": {
+      "category": "Musculoskeletal",
+      "subcategory": "Back pain"
+    },
+    "joint pain": {
+      "category": "Musculoskeletal",
+      "subcategory": "Joint pain"
+    },
+    "body pain": {
+      "category": "Musculoskeletal",
+      "subcategory": "Body Pain"
+    },
+    "chest pain": {
+      "category": "Head & Pain Disorders",
+      "subcategory": "Chest pain"
+    },
+    "stomach pain": {
+      "category": "Head & Pain Disorders",
+      "subcategory": "Stomach pain"
+    },
+    "abdomen pain": {
+      "category": "Head & Pain Disorders",
+      "subcategory": "Abdomen"
+    },
+    "cough": {
+      "category": "Respiratory",
+      "subcategory": "Cough"
+    },
+    "dry cough": {
+      "category": "Respiratory",
+      "subcategory": "Cough"
+    },
+    "wet cough": {
+      "category": "Respiratory",
+      "subcategory": "Cough"
+    },
+    "breathing difficulty": {
+      "category": "Respiratory",
+      "subcategory": "Shortness of breath"
+    },
+    "shortness of breath": {
+      "category": "Respiratory",
+      "subcategory": "Shortness of breath"
+    },
+    "sore throat": {
+      "category": "Respiratory",
+      "subcategory": "Sore throat"
+    },
+    "runny nose": {
+      "category": "Respiratory",
+      "subcategory": "Runny nose"
+    },
+    "nose blockage": {
+      "category": "Respiratory",
+      "subcategory": "Nose"
+    },
+    "high bp": {
+      "category": "Lifestyle Diseases",
+      "subcategory": "Blood pressure high"
+    },
+    "hypertension": {
+      "category": "Lifestyle Diseases",
+      "subcategory": "Blood pressure high"
+    },
+    "diabetes": {
+      "category": "Lifestyle Diseases",
+      "subcategory": "Blood sugar high"
+    },
+    "low sugar": {
+      "category": "Lifestyle Diseases",
+      "subcategory": "Blood sugar low"
+    },
+    "thyroid": {
+      "category": "Lifestyle Diseases",
+      "subcategory": "Thyroid problems"
+    },
+    "acidity": {
+      "category": "Digestive System",
+      "subcategory": "Stomach"
+    },
+    "gas": {
+      "category": "Digestive System",
+      "subcategory": "Stomach"
+    },
+    "constipation": {
+      "category": "Digestive System",
+      "subcategory": "Constipation"
+    },
+    "diarrhoea": {
+      "category": "Digestive System",
+      "subcategory": "Diarrhoea"
+    },
+    "vomiting": {
+      "category": "Digestive System",
+      "subcategory": "Vomiting"
+    },
+    "nausea": {
+      "category": "Digestive System",
+      "subcategory": "Nausea"
+    },
+    "worms": {
+      "category": "Digestive System",
+      "subcategory": "Worms / parasites"
+    },
+    "parasites": {
+      "category": "Digestive System",
+      "subcategory": "Worms / parasites"
+    },
+    "liver pain": {
+      "category": "Organ Disorders",
+      "subcategory": "Liver problems"
+    },
+    "fatty liver": {
+      "category": "Organ Disorders",
+      "subcategory": "Liver problems"
+    },
+    "kidney pain": {
+      "category": "Organ Disorders",
+      "subcategory": "Kidney problems"
+    },
+    "kidney stone": {
+      "category": "Organ Disorders",
+      "subcategory": "Kidney problems"
+    },
+    "heart palpitations": {
+      "category": "Organ Disorders",
+      "subcategory": "Heart"
+    },
+    "eye pain": {
+      "category": "Sensory Organs",
+      "subcategory": "Eyes"
+    },
+    "red eyes": {
+      "category": "Sensory Organs",
+      "subcategory": "Eyes"
+    },
+    "ear pain": {
+      "category": "Sensory Organs",
+      "subcategory": "Ears"
+    },
+    "mouth ulcer": {
+      "category": "Sensory Organs",
+      "subcategory": "Mouth"
+    },
+    "acne": {
+      "category": "Skin & External",
+      "subcategory": "Acne"
+    },
+    "eczema": {
+      "category": "Skin & External",
+      "subcategory": "Eczema"
+    },
+    "psoriasis": {
+      "category": "Skin & External",
+      "subcategory": "Psoriasis"
+    },
+    "skin rash": {
+      "category": "Skin & External",
+      "subcategory": "Skin rash"
+    },
+    "itching": {
+      "category": "Skin & External",
+      "subcategory": "Skin"
+    },
+    "wounds": {
+      "category": "Skin & External",
+      "subcategory": "Wounds and bruises"
+    },
+    "dizziness": {
+      "category": "Neurological",
+      "subcategory": "Dizziness"
+    },
+    "vertigo": {
+      "category": "Neurological",
+      "subcategory": "Dizziness"
+    },
+    "epilepsy": {
+      "category": "Neurological",
+      "subcategory": "Epilepsy / convulsions"
+    },
+    "convulsions": {
+      "category": "Neurological",
+      "subcategory": "Epilepsy / convulsions"
+    },
+    "paralysis": {
+      "category": "Neurological",
+      "subcategory": "Paralysis / nerve weakness"
+    },
+    "fatigue": {
+      "category": "Recovery & Weakness",
+      "subcategory": "Fatigue"
+    },
+    "weakness": {
+      "category": "Recovery & Weakness",
+      "subcategory": "Weakness after illness"
+    },
+    "teething pain": {
+      "category": "Recovery & Weakness",
+      "subcategory": "Teething"
+    },
+    "urinary burning": {
+      "category": "Urinary System",
+      "subcategory": "Urinary problems"
+    },
+    "frequent urination": {
+      "category": "Urinary System",
+      "subcategory": "Urinary problems"
+    },
+    "urine infection": {
+      "category": "Urinary System",
+      "subcategory": "Urinary problems"
+    },
+    "period pain": {
+      "category": "Female Health",
+      "subcategory": "Menstrual pain"
+    },
+    "menopause symptoms": {
+      "category": "Female Health",
+      "subcategory": "Menopausal symptoms"
+    },
+    "sexual weakness": {
+      "category": "Male Health",
+      "subcategory": "Sexual weakness"
+    }
+  }

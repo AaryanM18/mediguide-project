@@ -1,6 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
+
 from auth import (
     create_user,
     authenticate_user
@@ -20,15 +21,19 @@ from crud import (
     get_patient_from_db,
     save_consultation
 )
+
 from logic import (
     df,
     smart_symptom_match,
     find_row,
-    detect_category,
     build_response,
-    generate_human_response
+    generate_human_response,
+    extract_intent,
+    map_symptom_to_category,
+    filter_dataset_by_category,
+    enrich_symptom_context,
+    apply_safety_checks
 )
-
 
 app = FastAPI(
     title="SmartHomeoAIAdvisor API",
@@ -121,14 +126,40 @@ def consult(req: ConsultRequest):
     user_input = req.symptom.lower().strip()
     severity = req.severity.lower().strip()
 
-    patient = get_patient_from_db(req.user_id)
-
-    mapped_symptom = smart_symptom_match(
+    intent_symptom = extract_intent(
         user_input
     )
 
+    category_data = map_symptom_to_category(
+        intent_symptom
+    )
+
+    if category_data:
+        filtered_df = filter_dataset_by_category(
+            category_data["subcategory"]
+        )
+    else:
+        filtered_df = df
+
+    patient = get_patient_from_db(
+    req.user_id
+)
+
+    enriched_input = enrich_symptom_context(
+    intent_symptom,
+    patient
+)
+
+    mapped_symptom = smart_symptom_match(
+    enriched_input
+)
+
+    patient = get_patient_from_db(
+        req.user_id
+    )
+
     row = find_row(
-        df,
+        filtered_df,
         mapped_symptom,
         severity
     )
@@ -149,6 +180,11 @@ def consult(req: ConsultRequest):
         1
     )
 
+    safety_warnings = apply_safety_checks(
+        row,
+        patient
+    )
+
     response = build_response(
         row,
         patient,
@@ -161,7 +197,8 @@ def consult(req: ConsultRequest):
     )
 
     return {
-        "success": True,
-        "data": response,
-        "message": human_message
-    }
+    "success": True,
+    "data": response,
+    "warnings": safety_warnings,
+    "message": human_message
+}

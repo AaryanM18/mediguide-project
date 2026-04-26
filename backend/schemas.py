@@ -23,6 +23,7 @@ class PatientProfile(BaseModel):
 
     blood_group: Optional[str] = ""
     bp_high: bool = False
+    bp_low: bool = False
     diabetic: bool = False
     sugar_level: Optional[str] = "normal"
     bp_reading: Optional[str] = ""
