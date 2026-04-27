@@ -1,443 +1,676 @@
-import React, { useState } from 'react';
-import { Eye, EyeOff, UserPlus, User, Mail, Lock, Calendar } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import { signupUser, registerPatient } from '../services/api';
+import React,{useState} from 'react';
+import {
+Eye,
+EyeOff,
+UserPlus,
+User,
+Mail,
+Lock,
+Calendar,
+Sparkles
+} from 'lucide-react';
 
-const SignupPage = ({ onSignup }) => {
-  const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+import {useNavigate} from 'react-router-dom';
+import {
+signupUser,
+registerPatient
+} from '../services/api';
 
-  const [formData, setFormData] = useState({
-    name: '',
-    age: '',
-    gender: 'M',
-    email: '',
-    password: ''
-  });
+const SignupPage=({onSignup})=>{
 
-  const navigate = useNavigate();
+const [showPassword,setShowPassword]=useState(false);
+const [loading,setLoading]=useState(false);
+const [error,setError]=useState('');
 
-  const parseBackendError = (err) => {
-    if (!err) return 'Unknown error';
+const [formData,setFormData]=useState({
+name:'',
+age:'',
+gender:'M',
+email:'',
+password:''
+});
 
-    if (typeof err === 'string') return err;
+const navigate=useNavigate();
 
-    if (err.message && typeof err.message === 'string') {
-      if (!err.message.includes('[object Object]')) {
-        return err.message;
-      }
-    }
+const parseBackendError=(err)=>{
 
-    if (Array.isArray(err.detail)) {
-      return err.detail.map((e) => e.msg || JSON.stringify(e)).join(', ');
-    }
+if(!err) return 'Unknown error';
 
-    if (typeof err.detail === 'string') {
-      return err.detail;
-    }
+if(typeof err==='string') return err;
 
-    if (Array.isArray(err.response?.data?.detail)) {
-      return err.response.data.detail
-        .map((e) => e.msg || JSON.stringify(e))
-        .join(', ');
-    }
+if(typeof err.detail==='string'){
+return err.detail;
+}
 
-    if (typeof err.response?.data?.detail === 'string') {
-      return err.response.data.detail;
-    }
+if(Array.isArray(err.detail)){
+return err.detail.map(
+e=>e.msg || JSON.stringify(e)
+).join(', ');
+}
 
-    if (typeof err.response?.data?.message === 'string') {
-      return err.response.data.message;
-    }
+return 'Signup failed.';
 
-    return 'Signup failed. Please check your details.';
-  };
+};
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+const handleSubmit=async(e)=>{
 
-    setError('');
-    setLoading(true);
+e.preventDefault();
 
-    if (!formData.name.trim()) {
-      setError('Full name is required.');
-      setLoading(false);
-      return;
-    }
+setError('');
+setLoading(true);
 
-    if (!formData.email.trim()) {
-      setError('Email is required.');
-      setLoading(false);
-      return;
-    }
+const age=parseInt(formData.age,10);
 
-    if (!formData.password || formData.password.length < 6) {
-      setError('Password must be at least 6 characters.');
-      setLoading(false);
-      return;
-    }
+if(!formData.name.trim()){
+setError('Full name required');
+setLoading(false);
+return;
+}
 
-    const parsedAge = parseInt(formData.age, 10);
+if(!age || age<1 || age>120){
+setError('Enter valid age');
+setLoading(false);
+return;
+}
 
-    if (!parsedAge || parsedAge <= 0 || parsedAge > 120) {
-      setError('Please enter a valid age.');
-      setLoading(false);
-      return;
-    }
+try{
 
-    try {
-      await signupUser(
-        formData.email.trim(),
-        formData.name.trim(),
-        formData.password
-      );
-
-      try {
-        await registerPatient({
-          user_id: formData.email.trim(),
-          name: formData.name.trim(),
-          age: parsedAge,
-          gender: formData.gender === 'M' ? 'male' : 'female',
-
-          existing_conditions: [],
-          allergies: [],
-          current_medications: [],
-          family_history: [],
-          food_preferences: [],
-
-          other_conditions: '',
-          other_allergy: '',
-          other_medication: '',
-          other_family_condition: '',
-          other_family_relation: '',
-          other_food_preference: '',
-
-          sleep_quality: '',
-          overthinking_level: '',
-          anger_level: '',
-          appetite_level: '',
-          stress_level: '',
-          energy_level: '',
-
-          blood_group: '',
-          bp_high: false,
-          diabetic: false,
-          sugar_level: '',
-          bp_reading: '',
-
-          thermal: '',
-          thirst: '',
-          sleep_pattern: '',
-          mental_state: ''
-        });
-      } catch (profileErr) {
-        console.error('Failed to auto-provision profile:', profileErr);
-      }
-
-     onSignup(
-  formData.email.trim(),
-  formData.name.trim(),
-  parsedAge,
-  formData.gender === 'M' ? 'male' : 'female'
+await signupUser(
+formData.email.trim(),
+formData.name.trim(),
+formData.password
 );
 
-    } catch (err) {
-      const parsedError = parseBackendError(err);
+try{
 
-      if (
-        parsedError.toLowerCase().includes('already') ||
-        parsedError.toLowerCase().includes('exists')
-      ) {
-        setError('Account already exists. Please log in.');
-      } else {
-        setError(parsedError);
-      }
+await registerPatient({
+user_id:formData.email.trim(),
+name:formData.name.trim(),
+age,
+gender:
+formData.gender==='M'
+?'male'
+:'female',
 
-      console.error('Signup error:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
+existing_conditions:[],
+allergies:[],
+current_medications:[],
+family_history:[],
+food_preferences:[],
 
-  return (
-    <div className="login-wrapper fade-in">
-      <div className="logo-section">
-        <UserPlus size={48} color="white" />
-        <h1>Join MediGuide</h1>
-      </div>
+other_conditions:'',
+other_allergy:'',
+other_medication:'',
+other_family_condition:'',
+other_family_relation:'',
+other_food_preference:'',
 
-      <div className="login-card">
-        {error && (
-          <div
-            style={{
-              background: '#fee2e2',
-              color: '#ef4444',
-              padding: '12px',
-              borderRadius: '12px',
-              marginBottom: '16px',
-              fontSize: '14px',
-              textAlign: 'center',
-              fontWeight: '600'
-            }}
-          >
-            {error}
-          </div>
-        )}
+sleep_quality:'',
+overthinking_level:'',
+anger_level:'',
+appetite_level:'',
+stress_level:'',
+energy_level:'',
 
-        <form onSubmit={handleSubmit}>
-          <div className="input-group">
-            <User size={20} className="input-icon" />
-            <input
-              type="text"
-              value={formData.name}
-              onChange={(e) =>
-                setFormData({ ...formData, name: e.target.value })
-              }
-              placeholder="Full Name"
-              required
-            />
-          </div>
+blood_group:'',
+bp_high:false,
+diabetic:false,
+sugar_level:'',
+bp_reading:'',
 
-          <div className="row-group">
-            <div className="input-group half">
-              <Calendar size={20} className="input-icon" />
-              <input
-                type="number"
-                value={formData.age}
-                onChange={(e) =>
-                  setFormData({ ...formData, age: e.target.value })
-                }
-                placeholder="Age"
-                min="1"
-                max="120"
-                required
-              />
-            </div>
+thermal:'',
+thirst:'',
+sleep_pattern:'',
+mental_state:''
 
-            <div className="gender-toggle">
-              <button
-                type="button"
-                className={formData.gender === 'M' ? 'active' : ''}
-                onClick={() => setFormData({ ...formData, gender: 'M' })}
-              >
-                M
-              </button>
+});
 
-              <button
-                type="button"
-                className={formData.gender === 'F' ? 'active' : ''}
-                onClick={() => setFormData({ ...formData, gender: 'F' })}
-              >
-                F
-              </button>
-            </div>
-          </div>
+}catch(e){
+console.error(e);
+}
 
-          <div className="input-group">
-            <Mail size={20} className="input-icon" />
-            <input
-              type="email"
-              value={formData.email}
-              onChange={(e) =>
-                setFormData({ ...formData, email: e.target.value })
-              }
-              placeholder="Email"
-              required
-            />
-          </div>
+onSignup(
+formData.email.trim(),
+formData.name.trim(),
+age,
+formData.gender==='M'
+?'male'
+:'female'
+);
 
-          <div className="input-group">
-            <Lock size={20} className="input-icon" />
-            <input
-              type={showPassword ? 'text' : 'password'}
-              value={formData.password}
-              onChange={(e) =>
-                setFormData({ ...formData, password: e.target.value })
-              }
-              placeholder="Password"
-              required
-            />
+}catch(err){
 
-            <button
-              type="button"
-              className="toggle-password"
-              onClick={() => setShowPassword(!showPassword)}
-            >
-              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-            </button>
-          </div>
+const parsed=parseBackendError(err);
 
-          <button
-            type="submit"
-            className="btn-dark"
-            style={{ marginTop: '16px' }}
-            disabled={loading}
-          >
-            {loading ? 'Creating Account...' : 'Create Account'}
-          </button>
-        </form>
-      </div>
+if(
+parsed.toLowerCase().includes('exists')
+){
+setError(
+'Account already exists.'
+);
+}else{
+setError(parsed);
+}
 
-      <div className="signup-link">
-        Already have an account?
-        <span onClick={() => navigate('/login')}> Log In</span>
-      </div>
+}
+finally{
+setLoading(false);
+}
 
-      <style>{`
-        .login-wrapper {
-          padding: 40px 24px;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          min-height: 100vh;
-          position: relative;
-          z-index: 1;
-        }
+};
 
-        .logo-section {
-          margin-top: 40px;
-          margin-bottom: 30px;
-          text-align: center;
-          color: white;
-        }
+return(
 
-        .logo-section h1 {
-          font-size: 28px;
-          font-weight: 800;
-          margin-top: 8px;
-          text-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
+<div className="signup-wrapper fade-in">
 
-        .login-card {
-          background: white;
-          border-radius: 32px;
-          padding: 32px 24px;
-          width: 100%;
-          box-shadow: var(--shadow);
-        }
+<div className="hero-section">
 
-        .input-group {
-          position: relative;
-          margin-bottom: 16px;
-        }
+<div className="hero-logo">
+<Sparkles
+size={42}
+color="white"
+/>
+</div>
 
-        .row-group {
-          display: flex;
-          gap: 12px;
-          margin-bottom: 16px;
-        }
+<span className="mini-label">
+AI Homeopathic Assistant
+</span>
 
-        .input-group.half {
-          flex: 1;
-          margin-bottom: 0;
-        }
+<h1>Create Account</h1>
 
-        .gender-toggle {
-          flex: 1;
-          display: flex;
-          background: #f4f3f7;
-          border-radius: 16px;
-          padding: 4px;
-          align-items: center;
-        }
+<p>
+Begin your personalized wellness journey.
+</p>
 
-        .gender-toggle button {
-          flex: 1;
-          border: none;
-          background: transparent;
-          border-radius: 12px;
-          font-size: 15px;
-          font-weight: 600;
-          color: #6b7280;
-          padding: 12px 0;
-          cursor: pointer;
-          transition: all 0.2s;
-        }
+</div>
 
-        .gender-toggle button.active {
-          background: var(--primary);
-          color: white;
-          box-shadow: 0 2px 8px rgba(139, 92, 246, 0.4);
-        }
+<div className="signup-card">
 
-        .input-icon {
-          position: absolute;
-          left: 16px;
-          top: 50%;
-          transform: translateY(-50%);
-          color: #9ca3af;
-          z-index: 2;
-        }
+<h2>Join MediGuide</h2>
 
-        .input-group input {
-          width: 100%;
-          padding: 16px 16px 16px 48px;
-          border-radius: 16px;
-          border: none;
-          background: #f4f3f7;
-          font-size: 15px;
-          outline: none;
-          transition: all 0.2s;
-          font-weight: 500;
-          color: #33324f;
-          box-sizing: border-box;
-        }
+{error && (
+<div className="error-box">
+{error}
+</div>
+)}
 
-        .input-group input:focus {
-          background: white;
-          box-shadow: 0 0 0 2px var(--primary-light);
-        }
+<form onSubmit={handleSubmit}>
 
-        .toggle-password {
-          position: absolute;
-          right: 16px;
-          top: 50%;
-          transform: translateY(-50%);
-          background: none;
-          border: none;
-          color: #9ca3af;
-          cursor: pointer;
-          z-index: 2;
-        }
+<div className="input-group">
+<User size={20} className="input-icon"/>
+<input
+type="text"
+placeholder="Full Name"
+value={formData.name}
+onChange={(e)=>
+setFormData({
+...formData,
+name:e.target.value
+})
+}
+required
+/>
+</div>
 
-        .btn-dark {
-          width: 100%;
-          padding: 18px;
-          border-radius: 16px;
-          border: none;
-          background: var(--dark-header);
-          color: white;
-          font-size: 16px;
-          font-weight: 600;
-          cursor: pointer;
-          transition: opacity 0.2s;
-        }
+<div className="row-group">
 
-        .btn-dark:disabled {
-          opacity: 0.6;
-          cursor: not-allowed;
-        }
+<div className="input-group half">
+<Calendar
+size={20}
+className="input-icon"
+/>
 
-        .btn-dark:active {
-          opacity: 0.8;
-        }
+<input
+type="number"
+placeholder="Age"
+value={formData.age}
+onChange={(e)=>
+setFormData({
+...formData,
+age:e.target.value
+})
+}
+/>
+</div>
 
-        .signup-link {
-          margin-top: auto;
-          font-size: 14px;
-          color: #6b7280;
-          padding-bottom: 20px;
-        }
+<div className="gender-toggle">
 
-        .signup-link span {
-          color: var(--primary);
-          font-weight: 600;
-          cursor: pointer;
-        }
-      `}</style>
-    </div>
-  );
+<button
+type="button"
+className={
+formData.gender==='M'
+?'active':''
+}
+onClick={()=>
+setFormData({
+...formData,
+gender:'M'
+})
+}
+>
+Male
+</button>
+
+<button
+type="button"
+className={
+formData.gender==='F'
+?'active':''
+}
+onClick={()=>
+setFormData({
+...formData,
+gender:'F'
+})
+}
+>
+Female
+</button>
+
+</div>
+
+</div>
+
+<div className="input-group">
+<Mail size={20} className="input-icon"/>
+<input
+type="email"
+placeholder="Email"
+value={formData.email}
+onChange={(e)=>
+setFormData({
+...formData,
+email:e.target.value
+})
+}
+/>
+</div>
+
+<div className="input-group">
+
+<Lock
+size={20}
+className="input-icon"
+/>
+
+<input
+type={
+showPassword
+?'text'
+:'password'
+}
+placeholder="Password"
+value={formData.password}
+onChange={(e)=>
+setFormData({
+...formData,
+password:e.target.value
+})
+}
+/>
+
+<button
+type="button"
+className="toggle-password"
+onClick={()=>
+setShowPassword(
+!showPassword
+)
+}
+>
+{showPassword
+?<EyeOff size={20}/>
+:<Eye size={20}/>
+}
+</button>
+
+</div>
+
+<button
+className="btn-main"
+disabled={loading}
+>
+{loading
+?'Creating Account...'
+:'Create Account'
+}
+</button>
+
+</form>
+
+</div>
+
+<div className="login-link">
+Already have an account?
+<span
+onClick={()=>
+navigate('/login')
+}
+>
+Log In
+</span>
+</div>
+
+<style>{`
+
+:root{
+--primary-950:#1e0738;
+--primary-900:#2d0a54;
+--primary-800:#4c1d95;
+--primary-700:#6d28d9;
+--primary-600:#8f56eb;
+--primary-300:#ddd6fe;
+--glow:rgba(143,86,235,.28);
+}
+
+.signup-wrapper{
+min-height:100vh;
+
+background:
+radial-gradient(circle at top right,
+rgba(143,86,235,.18),
+transparent 34%),
+linear-gradient(
+180deg,
+#f8f4ff,
+#efe7ff
+);
+
+display:flex;
+flex-direction:column;
+align-items:center;
+
+padding:42px 24px 28px;
+
+position:relative;
+overflow:hidden;
+}
+
+.signup-wrapper:before{
+content:"";
+position:absolute;
+width:260px;
+height:260px;
+border-radius:50%;
+background:rgba(143,86,235,.08);
+top:-90px;
+right:-90px;
+}
+
+/* HERO */
+
+.hero-section{
+margin-top:50px;
+margin-bottom:38px;
+text-align:center;
+z-index:2;
+}
+
+.hero-logo{
+width:100px;
+height:100px;
+
+margin:0 auto 20px;
+
+border-radius:30px;
+
+background:
+linear-gradient(
+135deg,
+#2d0a54,
+#5b21b6,
+#8f56eb
+);
+
+display:flex;
+align-items:center;
+justify-content:center;
+
+box-shadow:
+0 20px 42px var(--glow);
+
+animation:floatLogo 6s ease-in-out infinite;
+}
+
+.mini-label{
+font-size:11px;
+font-weight:800;
+letter-spacing:.7px;
+text-transform:uppercase;
+color:#7c3aed;
+}
+
+.hero-section h1{
+font-size:32px;
+font-weight:900;
+color:#24143f;
+margin:8px 0 6px;
+}
+
+.hero-section p{
+font-size:14px;
+font-weight:700;
+color:#6d28d9;
+}
+
+/* CARD */
+
+.signup-card{
+width:100%;
+
+padding:34px 24px;
+border-radius:34px;
+
+background:
+linear-gradient(
+145deg,
+rgba(255,255,255,.98),
+rgba(243,235,255,.92)
+);
+
+border:1px solid rgba(143,86,235,.12);
+
+box-shadow:
+0 18px 36px rgba(143,86,235,.10),
+inset 0 1px 0 rgba(255,255,255,.95);
+
+z-index:2;
+}
+
+.signup-card h2{
+text-align:center;
+font-size:22px;
+font-weight:900;
+color:#24143f;
+margin-bottom:24px;
+}
+
+/* ERROR */
+
+.error-box{
+background:#fff1f2;
+border:1px solid #fecdd3;
+color:#dc2626;
+padding:12px;
+border-radius:14px;
+margin-bottom:16px;
+font-size:14px;
+font-weight:700;
+text-align:center;
+}
+
+/* ROW */
+
+.row-group{
+display:flex;
+gap:12px;
+margin-bottom:18px;
+}
+
+/* INPUT */
+
+.input-group{
+position:relative;
+margin-bottom:18px;
+}
+
+.half{
+margin-bottom:0;
+flex:1;
+}
+
+.input-icon{
+position:absolute;
+left:16px;
+top:50%;
+transform:translateY(-50%);
+color:#8f56eb;
+}
+
+.input-group input{
+width:100%;
+padding:16px 16px 16px 50px;
+
+border-radius:18px;
+border:1px solid #ede9fe;
+
+background:
+linear-gradient(
+145deg,
+#ffffff,
+#f5eeff
+);
+
+font-size:15px;
+font-weight:700;
+color:#312e81;
+outline:none;
+box-sizing:border-box;
+}
+
+.input-group input:focus{
+border-color:#8f56eb;
+box-shadow:
+0 0 0 4px rgba(143,86,235,.12);
+}
+
+/* GENDER */
+
+.gender-toggle{
+flex:1;
+display:flex;
+
+background:#f8f5ff;
+border:1px solid #ede9fe;
+
+border-radius:18px;
+padding:4px;
+}
+
+.gender-toggle button{
+flex:1;
+border:none;
+background:transparent;
+
+border-radius:14px;
+
+font-size:14px;
+font-weight:900;
+color:#7c3aed;
+
+padding:13px 0;
+}
+
+.gender-toggle button.active{
+background:
+linear-gradient(
+135deg,
+#5b21b6,
+#8f56eb
+);
+
+color:white;
+
+box-shadow:
+0 8px 18px rgba(143,86,235,.20);
+}
+
+/* PASSWORD */
+
+.toggle-password{
+position:absolute;
+right:16px;
+top:50%;
+transform:translateY(-50%);
+background:none;
+border:none;
+color:#8f56eb;
+}
+
+/* BUTTON */
+
+.btn-main{
+width:100%;
+height:62px;
+
+border:none;
+border-radius:22px;
+
+background:
+linear-gradient(
+135deg,
+#2d0a54,
+#5b21b6,
+#8f56eb
+);
+
+color:white;
+font-size:16px;
+font-weight:900;
+
+box-shadow:
+0 18px 34px rgba(143,86,235,.28);
+
+margin-top:12px;
+}
+
+.btn-main:disabled{
+opacity:.6;
+box-shadow:none;
+}
+
+/* FOOTER */
+
+.login-link{
+margin-top:auto;
+padding-top:28px;
+padding-bottom:18px;
+
+font-size:14px;
+font-weight:600;
+color:#64748b;
+z-index:2;
+}
+
+.login-link span{
+margin-left:8px;
+color:#7c3aed;
+font-weight:900;
+cursor:pointer;
+}
+
+@keyframes floatLogo{
+0%{transform:translateY(0);}
+50%{transform:translateY(-4px);}
+100%{transform:translateY(0);}
+}
+
+`}</style>
+
+</div>
+
+);
+
 };
 
 export default SignupPage;

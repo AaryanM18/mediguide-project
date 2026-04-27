@@ -222,12 +222,16 @@ const HealthProfilePage = ({ user }) => {
       const response = await registerPatient(payload);
 
       if (response.success) {
-        localStorage.removeItem('is_new');
-        alert('Profile saved successfully!');
-        navigate('/');
-      } else {
-        throw response;
-      }
+  localStorage.setItem('user_name', formData.name.trim());
+  localStorage.setItem('user_age', formData.age || '');
+  localStorage.setItem('user_gender', formData.gender || '');
+  localStorage.removeItem('is_new');
+
+  alert('Profile saved successfully!');
+  navigate('/');
+} else {
+  throw response;
+}
     } catch (err) {
       alert(parseSaveError(err));
       console.error(err);
@@ -392,66 +396,63 @@ const HealthProfilePage = ({ user }) => {
         </section>
 
         <section className="form-section">
-          <div className="section-title">
-            <Activity size={20} className="section-icon" />
-            <h3>Family History</h3>
-          </div>
+  <div className="section-title">
+    <Activity size={20} className="section-icon"/>
+    <h3>Family History</h3>
+  </div>
 
-          {hereditaryConditions.map((condition) => {
-            const selected = formData.family_history.find(
-              (item) => item.condition === condition
-            );
+  <div className="family-history-grid">
+    {hereditaryConditions.map((condition) => {
+      const selected = formData.family_history.find(
+        item => item.condition === condition
+      );
 
-            return (
-              <div key={condition} className="family-history-item">
-                <button
-                  type="button"
-                  className={`condition-tag ${selected ? 'active' : ''}`}
-                  onClick={() =>
-                    selected
-                      ? updateFamilyHistory(condition, null)
-                      : updateFamilyHistory(condition, '')
-                  }
+      return (
+        <div key={condition} className="family-history-card">
+
+          <button
+            type="button"
+            className={`condition-tag ${selected ? "active" : ""}`}
+            onClick={() =>
+              selected
+                ? updateFamilyHistory(condition,null)
+                : updateFamilyHistory(condition,"")
+            }
+          >
+            {condition}
+          </button>
+
+          {selected && (
+            <select
+              className="relation-select"
+              value={selected.relation}
+              onChange={(e)=>
+                updateFamilyHistory(
+                  condition,
+                  e.target.value
+                )
+              }
+            >
+              <option value="">
+                Select relation
+              </option>
+
+              {relations.map((relation)=>(
+                <option
+                  key={relation}
+                  value={relation}
                 >
-                  {condition}
-                </button>
-
-                {selected && (
-                  <select
-                    className="input-field relation-select"
-                    value={selected.relation}
-                    onChange={(e) => updateFamilyHistory(condition, e.target.value)}
-                  >
-                    <option value="">Select relation</option>
-                    {relations.map((relation) => (
-                      <option key={relation} value={relation}>
-                        {relation}
-                      </option>
-                    ))}
-                  </select>
-                )}
-              </div>
-            );
-          })}
-
-          {formData.family_history.some((item) => item.condition === 'Other') && (
-            <InputField
-              label="Other Family Condition"
-              value={formData.other_family_condition}
-              onChange={(value) => setFormData({ ...formData, other_family_condition: value })}
-              placeholder="Enter other hereditary condition"
-            />
+                  {relation}
+                </option>
+              ))}
+            </select>
           )}
 
-          {formData.family_history.some((item) => item.relation === 'Other') && (
-            <InputField
-              label="Other Relation"
-              value={formData.other_family_relation}
-              onChange={(value) => setFormData({ ...formData, other_family_relation: value })}
-              placeholder="Enter relation"
-            />
-          )}
-        </section>
+        </div>
+      );
+    })}
+  </div>
+</section>
 
         <section className="form-section">
           <div className="section-title">
@@ -665,253 +666,486 @@ const MultiSelectSection = ({ title, icon, options, values, onToggle }) => (
 );
 
 const styles = `
-.health-profile-container { padding-bottom: 40px; }
-.health-header {
-  height: 240px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  border-bottom-left-radius: 40px;
-  border-bottom-right-radius: 40px;
-  position: relative;
-  background: var(--dark-header);
+:root{
+--primary-950:#1e0738;
+--primary-900:#2d0a54;
+--primary-800:#4c1d95;
+--primary-700:#6d28d9;
+--primary-600:#8f56eb;
+--primary-500:#a78bfa;
+--primary-400:#c4b5fd;
+--primary-300:#ddd6fe;
+
+--surface:#f8f4ff;
+--surface-2:#efe7ff;
+--text-dark:#24143f;
+
+--glow:rgba(143,86,235,.28);
 }
-.back-btn {
-  position: absolute;
-  top: 60px;
-  left: 20px;
-  background: none;
-  border: none;
-  cursor: pointer;
+
+.health-profile-container{
+min-height:100vh;
+padding-bottom:40px;
+background:
+radial-gradient(circle at top right, rgba(143,86,235,.18), transparent 34%),
+linear-gradient(180deg,#f8f4ff,#efe7ff);
 }
-.health-header-content {
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
+
+.health-header{
+height:265px;
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+
+border-bottom-left-radius:42px;
+border-bottom-right-radius:42px;
+
+position:relative;
+overflow:hidden;
+
+background:
+linear-gradient(
+135deg,
+#2d0a54 0%,
+#5b21b6 48%,
+#8f56eb 100%
+);
+
+box-shadow:
+0 18px 40px var(--glow),
+0 4px 12px rgba(76,29,149,.16);
 }
-.health-header-content p {
-  color: rgba(255,255,255,0.8);
-  font-size: 14px;
+
+.health-header:before{
+content:"";
+position:absolute;
+width:170px;
+height:170px;
+left:-50px;
+bottom:-60px;
+border-radius:50%;
+background:rgba(255,255,255,.06);
 }
-.shield-icon {
-  width: 70px;
-  height: 80px;
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0.9;
+
+.health-header:after{
+content:"";
+position:absolute;
+width:200px;
+height:200px;
+right:-55px;
+top:-70px;
+border-radius:50%;
+background:rgba(255,255,255,.09);
 }
-.shield-plus {
-  position: absolute;
-  font-size: 24px;
-  font-weight: bold;
-  color: rgba(139, 92, 246, 0.6);
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 10;
+
+.back-btn{
+position:absolute;
+top:58px;
+left:20px;
+width:48px;
+height:48px;
+
+background:rgba(255,255,255,.14);
+border:1px solid rgba(255,255,255,.22);
+border-radius:16px;
+
+backdrop-filter:blur(14px);
+
+display:flex;
+align-items:center;
+justify-content:center;
+
+box-shadow:
+0 14px 28px rgba(0,0,0,.16),
+inset 0 1px 0 rgba(255,255,255,.16);
 }
-.health-header h1 {
-  font-size: 28px;
-  color: white;
-  font-weight: 700;
+
+.health-header-content{
+display:flex;
+flex-direction:column;
+align-items:center;
+gap:12px;
+position:relative;
+z-index:2;
 }
-.health-body { padding: 24px; }
-.form-section {
-  margin-bottom: 32px;
-  padding: 24px;
-  background: white;
-  border-radius: 24px;
-  border: none;
-  box-shadow: var(--shadow);
+
+.shield-icon{
+width:78px;
+height:78px;
+border-radius:24px;
+
+background:rgba(255,255,255,.14);
+border:1px solid rgba(255,255,255,.22);
+
+backdrop-filter:blur(14px);
+
+display:flex;
+align-items:center;
+justify-content:center;
+
+position:relative;
+
+box-shadow:
+0 14px 28px rgba(0,0,0,.16),
+inset 0 1px 0 rgba(255,255,255,.14);
 }
-.section-title {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 20px;
+
+.shield-plus{
+color:#c4b5fd;
 }
-.section-icon { color: var(--primary); }
-.section-title h3 {
-  font-size: 16px;
-  color: #2F2E41;
+
+.health-header h1{
+font-size:30px;
+font-weight:900;
+color:white;
 }
-.input-row {
-  display: flex;
-  gap: 16px;
+
+.health-header p{
+font-size:14px;
+font-weight:600;
+color:#ddd6fe;
 }
-.input-group {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+
+.health-body{
+padding:28px 22px;
 }
-.input-group label {
-  font-size: 13px;
-  color: #9ca3af;
-  font-weight: 600;
+
+.form-section{
+margin-bottom:26px;
+padding:24px;
+border-radius:30px;
+
+background:
+linear-gradient(
+145deg,
+rgba(255,255,255,.98),
+rgba(243,235,255,.92)
+);
+
+border:1px solid rgba(143,86,235,.12);
+
+box-shadow:
+0 16px 32px rgba(143,86,235,.10),
+inset 0 1px 0 rgba(255,255,255,.95);
 }
-.input-with-icon {
-  position: relative;
-  display: flex;
-  align-items: center;
+
+.section-title{
+display:flex;
+align-items:center;
+gap:12px;
+margin-bottom:20px;
 }
-.input-with-icon svg {
-  position: absolute;
-  left: 16px;
-  color: #9ca3af;
+
+.section-icon{
+color:var(--primary-600);
 }
-.input-with-icon .input-field { padding-left: 48px; }
-.input-field {
-  padding: 16px;
-  border-radius: 16px;
-  border: none;
-  background: #f4f3f7;
-  font-size: 15px;
-  outline: none;
-  transition: all 0.2s;
-  font-weight: 500;
-  color: #33324f;
-  width: 100%;
-  box-sizing: border-box;
+
+.section-title h3{
+font-size:17px;
+font-weight:900;
+color:var(--text-dark);
 }
-.input-field:focus {
-  background: white;
-  box-shadow: 0 0 0 2px var(--primary-light);
+
+.input-row{
+display:flex;
+gap:16px;
 }
-.conditions-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
+
+.input-group{
+flex:1;
+display:flex;
+flex-direction:column;
+gap:8px;
 }
-.condition-tag {
-  padding: 12px 18px;
-  border-radius: 16px;
-  border: none;
-  background: #f4f3f7;
-  font-size: 14px;
-  font-weight: 600;
-  color: #4b5563;
-  cursor: pointer;
-  transition: all 0.2s;
+
+.input-group label,
+.q-label{
+font-size:13px;
+font-weight:800;
+color:var(--primary-700);
 }
-.condition-tag.active {
-  background: var(--primary);
-  color: white;
-  box-shadow: 0 4px 10px rgba(139, 92, 246, 0.4);
+
+.input-field{
+width:100%;
+padding:15px 16px;
+
+border-radius:16px;
+border:1px solid rgba(143,86,235,.16);
+
+background:
+linear-gradient(
+145deg,
+#ffffff,
+#f5eeff
+);
+
+font-size:14px;
+font-weight:700;
+color:var(--text-dark);
+
+box-sizing:border-box;
+
+box-shadow:
+0 6px 14px rgba(143,86,235,.06),
+inset 0 1px 0 rgba(255,255,255,.9);
 }
-.option-category { margin-bottom: 18px; }
-.option-category h4 {
-  font-size: 14px;
-  color: #2F2E41;
-  margin-bottom: 10px;
-  font-weight: 800;
+
+.input-field:focus{
+outline:none;
+border-color:var(--primary-600);
+box-shadow:0 0 0 4px rgba(143,86,235,.12);
 }
-.family-history-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 12px;
-  flex-wrap: wrap;
+
+.input-with-icon{
+position:relative;
+display:flex;
+align-items:center;
 }
-.relation-select {
-  max-width: 220px;
-  padding: 12px;
+
+.input-with-icon svg{
+position:absolute;
+left:16px;
+color:#8f56eb;
 }
-.other-input-box {
-  background: #f4f3f7;
-  border-radius: 16px;
-  padding: 16px;
-  display: flex;
-  gap: 12px;
+
+.input-with-icon .input-field{
+padding-left:48px;
 }
-.other-textarea {
-  flex: 1;
-  background: none;
-  border: none;
-  resize: none;
-  height: 80px;
-  outline: none;
-  font-family: inherit;
-  font-size: 14px;
-  color: #2F2E41;
+
+.conditions-grid{
+display:flex;
+flex-wrap:wrap;
+gap:10px;
 }
-.questionnaire-group { margin-bottom: 24px; }
-.q-label {
-  font-size: 15px;
-  font-weight: 800;
-  color: #2F2E41;
-  display: block;
-  margin-bottom: 6px;
+
+.condition-tag{
+padding:11px 16px;
+border-radius:16px;
+border:1px solid #ede9fe;
+
+background:
+linear-gradient(
+145deg,
+#ffffff,
+#f5eeff
+);
+
+font-size:13px;
+font-weight:700;
+color:#5b21b6;
+
+box-shadow:
+0 6px 14px rgba(143,86,235,.06),
+inset 0 1px 0 rgba(255,255,255,.9);
+
+cursor:pointer;
+transition:.2s;
 }
-.toggle-row {
-  display: flex;
-  gap: 8px;
+
+.condition-tag:hover{
+transform:translateY(-1px);
+box-shadow:0 8px 18px rgba(143,86,235,.14);
 }
-.half-toggle {
-  flex: 1;
-  align-items: flex-end;
+
+.condition-tag.active{
+background:
+linear-gradient(
+135deg,
+#5b21b6,
+#8f56eb
+);
+color:white;
+box-shadow:
+0 10px 22px rgba(143,86,235,.28);
 }
-.toggle-btn {
-  flex: 1;
-  padding: 12px;
-  border-radius: 14px;
-  border: 1px solid #E5E7EB;
-  background: #F9FAFB;
-  font-size: 13px;
-  font-weight: 700;
-  color: #4b5563;
-  cursor: pointer;
-  transition: all 0.2s;
+
+.option-category{
+margin-bottom:20px;
 }
-.toggle-btn.active {
-  background: #8B5CF6;
-  color: white;
-  border-color: #8B5CF6;
-  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.2);
+
+.option-category h4{
+font-size:14px;
+font-weight:900;
+color:var(--text-dark);
+margin-bottom:10px;
 }
-.top-gap { margin-top: 16px; }
-.next-btn {
-  height: 60px;
-  border-radius: 20px;
-  font-size: 16px;
-  margin-top: 10px;
-  width: 100%;
-  background: var(--dark-header);
-  color: white;
-  border: none;
-  font-weight: 700;
-  cursor: pointer;
+
+.family-history-grid{
+display:flex;
+flex-wrap:wrap;
+gap:14px;
 }
-.next-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
+
+.family-history-card{
+display:flex;
+flex-direction:column;
+gap:10px;
 }
-.loading-screen {
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 20px;
-  color: #9ca3af;
+
+.family-history-grid .condition-tag{
+padding:11px 16px;
+font-size:13px;
+font-weight:700;
 }
-.spinner {
-  width: 40px;
-  height: 40px;
-  border: 4px solid #f3f4f6;
-  border-top: 4px solid var(--primary);
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
+
+.family-history-grid .condition-tag.active{
+background:linear-gradient(
+135deg,
+#5b21b6,
+#8f56eb
+);
 }
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+
+.relation-select{
+padding:10px 12px;
+font-size:13px;
+font-weight:600;
+
+min-width:155px;
+
+border-radius:14px;
+border:1px solid #ddd6fe;
+
+background:white;
+color:#5b21b6;
+
+box-shadow:
+0 4px 10px rgba(139,92,246,.08);
+}
+
+.other-input-box{
+background:linear-gradient(145deg,#ffffff,#f5eeff);
+border:1px solid #ede9fe;
+border-radius:18px;
+padding:16px;
+display:flex;
+gap:12px;
+}
+
+.other-textarea{
+flex:1;
+height:90px;
+resize:none;
+border:none;
+outline:none;
+background:transparent;
+font-size:14px;
+font-weight:600;
+color:#312e81;
+}
+
+.toggle-row{
+display:flex;
+gap:10px;
+}
+
+.half-toggle{
+flex:1;
+align-items:flex-end;
+}
+
+.toggle-btn{
+flex:1;
+padding:13px;
+
+border-radius:16px;
+border:1px solid #ede9fe;
+
+background:
+linear-gradient(
+145deg,
+#ffffff,
+#f5eeff
+);
+
+font-size:13px;
+font-weight:800;
+color:#5b21b6;
+}
+
+.toggle-btn.active{
+background:
+linear-gradient(
+135deg,
+#5b21b6,
+#8f56eb
+);
+color:white;
+box-shadow:
+0 10px 22px rgba(143,86,235,.28);
+}
+
+.questionnaire-group{
+margin-bottom:24px;
+}
+
+.top-gap{
+margin-top:16px;
+}
+
+.next-btn{
+height:62px;
+width:100%;
+margin-top:14px;
+
+border:none;
+border-radius:22px;
+
+background:
+linear-gradient(
+135deg,
+#2d0a54,
+#5b21b6,
+#8f56eb
+);
+
+color:white;
+font-size:16px;
+font-weight:900;
+
+box-shadow:
+0 18px 34px rgba(143,86,235,.28);
+}
+
+.next-btn:active{
+transform:scale(.98);
+}
+
+.next-btn:disabled{
+opacity:.6;
+box-shadow:none;
+}
+
+.loading-screen{
+height:100vh;
+background:
+linear-gradient(180deg,#f8f4ff,#efe7ff);
+
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+gap:20px;
+
+color:#7c3aed;
+font-weight:800;
+}
+
+.spinner{
+width:42px;
+height:42px;
+
+border:4px solid #ede9fe;
+border-top:4px solid #8f56eb;
+
+border-radius:50%;
+animation:spin 1s linear infinite;
+}
+
+@keyframes spin{
+0%{transform:rotate(0deg);}
+100%{transform:rotate(360deg);}
 }
 `;
-
 export default HealthProfilePage;

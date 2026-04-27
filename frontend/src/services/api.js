@@ -42,7 +42,7 @@ const getBaseUrl = () => {
         return 'https://mediguide-3jm3.onrender.com';
     }
     
-    return isLocal ? `http://${hostname}:8000` : 'https://mediguide-3jm3.onrender.com';
+    return isLocal ? 'http://127.0.0.1:8000' : 'https://mediguide-3jm3.onrender.com';
 };
 
 const BASE_URL = getBaseUrl();
@@ -75,8 +75,8 @@ export const signupUser = async (email, name, password) => {
       "Content-Type": "application/json"
     },
     body: JSON.stringify({
+      user_id: name,
       email: email,
-      username: name,
       password: password
     })
   });
@@ -89,7 +89,6 @@ export const signupUser = async (email, name, password) => {
 
   return data;
 };
-
 export const registerPatient = async (patientData) => {
   const res = await fetch(`${BASE_URL}/patient/register`, {
     method: "POST",
