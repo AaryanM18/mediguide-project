@@ -273,18 +273,27 @@ const SymptomAnalysisPage = ({ user }) => {
                             </div>
                         </div>
 
-                        <div className="result-info-grid">
-                            <div className="info-card">
-                                <Activity size={20} color="#8b5cf6" />
-                                <h5>Possible Condition</h5>
-                                <p>{result.remedy.possible_condition}</p>
-                            </div>
-                            <div className="info-card" style={{ maxHeight: '250px', overflowY: 'auto' }}>
-                                <Info size={20} color="#8b5cf6" />
-                                <h5>Why this? {result.remedy.name}?</h5>
-                                <p style={{fontSize: '13px'}}>{result.remedy.why_this_remedy || result.remedy.remedy_reason}</p>
-                            </div>
-                        </div>
+                        <div className="result-info-stack">
+
+    <div className="info-card condition-card">
+        <Activity size={20} color="#8b5cf6" />
+        <h5>Possible Condition</h5>
+        <p>{result.remedy.possible_condition}</p>
+    </div>
+
+    <div className="info-card why-card">
+        <Info size={20} color="#8b5cf6" />
+        <h5>Why this medicine?</h5>
+
+        <div className="why-scroll">
+            <p>
+                {result.remedy.why_this_remedy || result.remedy.remedy_reason}
+            </p>
+        </div>
+
+    </div>
+
+</div>
 
                         {result.patient_safety.warnings.length > 0 && (
                             <div className="safety-section">
@@ -315,11 +324,7 @@ const SymptomAnalysisPage = ({ user }) => {
                     </div>
                 )}
             </div>
-
-           /* Keep your business logic exactly as is.
-Replace only your <style>{` ... `}</style> block with this */
-
-<style>{`
+            <style>{`
 
 :root{
 --primary-950:#1e0738;
@@ -697,11 +702,57 @@ color:#ddd6fe;
 
 /* INFO GRID */
 
-.result-info-grid{
-display:grid;
-grid-template-columns:1fr 1fr;
+.result-info-stack{
+display:flex;
+flex-direction:column;
 gap:14px;
 margin-bottom:28px;
+}
+
+.condition-card{
+min-height:110px;
+}
+
+.why-card{
+padding-bottom:18px;
+background:
+linear-gradient(
+145deg,
+rgba(255,255,255,.98),
+rgba(243,235,255,.92)
+) !important;
+color:#312e81 !important;
+border:1px solid rgba(143,86,235,.12);
+box-shadow:0 10px 22px rgba(143,86,235,.08);
+}
+
+.why-card h5{
+color:#7c3aed !important;
+}
+
+.why-card p{
+color:#334155 !important;
+}
+
+.why-scroll{
+max-height:240px;
+overflow-y:auto;
+padding-right:8px;
+margin-top:10px;
+}
+
+.why-scroll::-webkit-scrollbar{
+width:5px;
+}
+
+.why-scroll::-webkit-scrollbar-thumb{
+background:#c4b5fd;
+border-radius:10px;
+}
+
+.why-scroll p{
+font-size:14px;
+line-height:1.7;
 }
 
 .info-card{
@@ -743,11 +794,25 @@ box-shadow:
 0 8px 18px rgba(143,86,235,.07);
 }
 
+.safety-section{
+margin-top:30px;
+}
+
+.safety-section h3,
+.lifestyle-section h3{
+font-size:22px;
+font-weight:900;
+color:#33324f;
+margin-bottom:12px;
+}
+
 /* LIFESTYLE */
 
 .advice-card{
-padding:18px;
-border-radius:18px;
+padding:24px 22px;
+margin-bottom:18px;
+
+border-radius:24px;
 
 background:
 linear-gradient(
@@ -756,10 +821,26 @@ rgba(255,255,255,.98),
 rgba(243,235,255,.92)
 );
 
-border-left:4px solid #10b981;
+border-left:4px solid #34d399;
 
 box-shadow:
-0 8px 18px rgba(143,86,235,.07);
+0 10px 20px rgba(143,86,235,.07);
+}
+.advice-card h4{
+font-size:16px;
+font-weight:800;
+margin-bottom:10px;
+line-height:1.4;
+}
+
+.advice-card p{
+font-size:15px;
+line-height:1.7;
+color:#4b5563;
+}
+
+.lifestyle-section h3{
+margin-bottom:18px;
 }
 
 /* RESET */
@@ -831,9 +912,6 @@ padding:18px;
 border-radius:26px;
 }
 
-.result-info-grid{
-grid-template-columns:1fr;
-}
 
 .severity-grid{
 grid-template-columns:repeat(2,1fr);

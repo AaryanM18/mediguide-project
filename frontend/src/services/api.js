@@ -45,7 +45,7 @@ const getBaseUrl = () => {
     return isLocal ? 'http://127.0.0.1:8000' : 'https://mediguide-3jm3.onrender.com';
 };
 
-const BASE_URL = getBaseUrl();
+const BASE_URL = "http://127.0.0.1:8000";
 
 export const loginUser = async (email, password) => {
   const res = await fetch(`${BASE_URL}/api/auth/login`, {
@@ -75,8 +75,8 @@ export const signupUser = async (email, name, password) => {
       "Content-Type": "application/json"
     },
     body: JSON.stringify({
-      user_id: name,
-      email: email,
+      user_id: email.trim(),
+      email: email.trim(),
       password: password
     })
   });
@@ -87,7 +87,10 @@ export const signupUser = async (email, name, password) => {
     throw data;
   }
 
-  return data;
+  return {
+    ...data,
+    name
+  };
 };
 export const registerPatient = async (patientData) => {
   const res = await fetch(`${BASE_URL}/patient/register`, {
