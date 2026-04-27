@@ -2,12 +2,17 @@ import psycopg2
 import os
 
 
-DATABASE_URL = os.getenv("DATABASE_URL")
+DATABASE_URL = os.getenv("postgresql://mediguide_user:4WaLZYxO9irJO25bVp3ceVf18eSgzSCZ@dpg-d7nm2enlk1mc73forcs0-a.singapore-postgres.render.com/mediguide_2btg")
 
 
 def get_db():
-    conn = psycopg2.connect(DATABASE_URL)
-    return conn
+    try:
+        conn = psycopg2.connect("postgresql://mediguide_user:4WaLZYxO9irJO25bVp3ceVf18eSgzSCZ@dpg-d7nm2enlk1mc73forcs0-a.singapore-postgres.render.com/mediguide_2btg")
+        print("Database connected successfully")
+        return conn
+    except Exception as e:
+        print("Database connection failed:", str(e))
+        raise
 
 
 def init_db():
