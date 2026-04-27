@@ -1,34 +1,35 @@
-import sqlite3
+import psycopg2
 import os
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DB_PATH = os.path.join(BASE_DIR, "homeo.db")
+
+DATABASE_URL = os.getenv("DATABASE_URL")
+
 
 def get_db():
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
+    conn = psycopg2.connect(DATABASE_URL)
     return conn
 
 
 def init_db():
     conn = get_db()
+    cursor = conn.cursor()
 
-    conn.execute("""
+    cursor.execute("""
         CREATE TABLE IF NOT EXISTS patients (
             user_id TEXT PRIMARY KEY,
             name TEXT,
             age INTEGER,
             gender TEXT,
             blood_group TEXT,
-            bp_high INTEGER DEFAULT 0,
-            diabetic INTEGER DEFAULT 0,
+            bp_high BOOLEAN DEFAULT FALSE,
+            bp_low BOOLEAN DEFAULT FALSE,
+            diabetic BOOLEAN DEFAULT FALSE,
             sugar_level TEXT,
             bp_reading TEXT,
             allergies TEXT,
             existing_conditions TEXT,
             other_conditions TEXT,
             current_medications TEXT,
-
             family_history TEXT,
             sleep_quality TEXT,
             overthinking_level TEXT,
@@ -40,27 +41,28 @@ def init_db():
         )
     """)
 
-    conn.execute("""
+    cursor.execute("""
         CREATE TABLE IF NOT EXISTS consultations (
-            id TEXT PRIMARY KEY,
+            id SERIAL PRIMARY KEY,
             user_id TEXT,
             symptom TEXT,
             severity TEXT,
             remedy_name TEXT,
             potency TEXT,
             condition TEXT,
-            consult_doctor INTEGER,
-            created_at TEXT DEFAULT (datetime('now'))
+            consult_doctor BOOLEAN,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     """)
 
-    conn.execute("""
-         CREATE TABLE IF NOT EXISTS users (
-                id TEXT PRIMARY KEY,
-                email TEXT UNIQUE,
-                password TEXT
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS users (
+            id TEXT PRIMARY KEY,
+            email TEXT UNIQUE,
+            password TEXT
         )
     """)
 
     conn.commit()
+    cursor.close()
     conn.close()

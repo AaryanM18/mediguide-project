@@ -4,8 +4,9 @@ from database import get_db
 
 def register_patient(patient):
     conn = get_db()
+    cursor = conn.cursor()
 
-    conn.execute("""
+    cursor.execute("""
         INSERT INTO patients (
             user_id,
             name,
@@ -30,38 +31,38 @@ def register_patient(patient):
             stress_level,
             energy_level
         )
-        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
         ON CONFLICT(user_id) DO UPDATE SET
-            name=excluded.name,
-            age=excluded.age,
-            gender=excluded.gender,
-            blood_group=excluded.blood_group,
-            bp_high=excluded.bp_high,
-            bp_low=excluded.bp_low,
-            diabetic=excluded.diabetic,
-            sugar_level=excluded.sugar_level,
-            bp_reading=excluded.bp_reading,
-            allergies=excluded.allergies,
-            existing_conditions=excluded.existing_conditions,
-            other_conditions=excluded.other_conditions,
-            current_medications=excluded.current_medications,
-            family_history=excluded.family_history,
-            sleep_quality=excluded.sleep_quality,
-            overthinking_level=excluded.overthinking_level,
-            anger_level=excluded.anger_level,
-            appetite_level=excluded.appetite_level,
-            food_preferences=excluded.food_preferences,
-            stress_level=excluded.stress_level,
-            energy_level=excluded.energy_level
+            name=EXCLUDED.name,
+            age=EXCLUDED.age,
+            gender=EXCLUDED.gender,
+            blood_group=EXCLUDED.blood_group,
+            bp_high=EXCLUDED.bp_high,
+            bp_low=EXCLUDED.bp_low,
+            diabetic=EXCLUDED.diabetic,
+            sugar_level=EXCLUDED.sugar_level,
+            bp_reading=EXCLUDED.bp_reading,
+            allergies=EXCLUDED.allergies,
+            existing_conditions=EXCLUDED.existing_conditions,
+            other_conditions=EXCLUDED.other_conditions,
+            current_medications=EXCLUDED.current_medications,
+            family_history=EXCLUDED.family_history,
+            sleep_quality=EXCLUDED.sleep_quality,
+            overthinking_level=EXCLUDED.overthinking_level,
+            anger_level=EXCLUDED.anger_level,
+            appetite_level=EXCLUDED.appetite_level,
+            food_preferences=EXCLUDED.food_preferences,
+            stress_level=EXCLUDED.stress_level,
+            energy_level=EXCLUDED.energy_level
     """, (
         patient.user_id,
         patient.name,
         patient.age,
         patient.gender,
         patient.blood_group,
-        int(patient.bp_high),
-        int(patient.bp_low),
-        int(patient.diabetic),
+        patient.bp_high,
+        patient.bp_low,
+        patient.diabetic,
         patient.sugar_level,
         patient.bp_reading,
         json.dumps(patient.allergies),
@@ -81,6 +82,7 @@ def register_patient(patient):
     ))
 
     conn.commit()
+    cursor.close()
     conn.close()
 
     return {
@@ -88,20 +90,25 @@ def register_patient(patient):
         "message": f"Profile saved for {patient.name}"
     }
 
+
 def get_patient_from_db(user_id):
     conn = get_db()
+    cursor = conn.cursor()
 
-    row = conn.execute(
-        "SELECT * FROM patients WHERE user_id = ?",
+    cursor.execute(
+        "SELECT * FROM patients WHERE user_id = %s",
         (user_id,)
-    ).fetchone()
+    )
 
-    conn.close()
+    row = cursor.fetchone()
 
     if not row:
+        cursor.close()
+        conn.close()
         return {}
 
-    patient = dict(row)
+    columns = [desc[0] for desc in cursor.description]
+    patient = dict(zip(columns, row))
 
     for field in [
         "allergies",
@@ -111,14 +118,18 @@ def get_patient_from_db(user_id):
         "food_preferences"
     ]:
         try:
-            patient[field] = json.loads(patient.get(field) or "[]")
+            patient[field] = json.loads(
+                patient.get(field) or "[]"
+            )
         except:
             patient[field] = []
 
+    patient["bp_high"] = bool(patient.get("bp_high", False))
+    patient["bp_low"] = bool(patient.get("bp_low", False))
+    patient["diabetic"] = bool(patient.get("diabetic", False))
 
-    patient["bp_high"] = bool(patient.get("bp_high", 0))
-    patient["bp_low"] = bool(patient.get("bp_low", 0))
-    patient["diabetic"] = bool(patient.get("diabetic", 0))
+    cursor.close()
+    conn.close()
 
     return patient
 
@@ -133,8 +144,9 @@ def save_consultation(
     consult_doctor
 ):
     conn = get_db()
+    cursor = conn.cursor()
 
-    conn.execute("""
+    cursor.execute("""
         INSERT INTO consultations (
             user_id,
             symptom,
@@ -144,7 +156,7 @@ def save_consultation(
             condition,
             consult_doctor
         )
-        VALUES (?,?,?,?,?,?,?)
+        VALUES (%s,%s,%s,%s,%s,%s,%s)
     """, (
         user_id,
         symptom,
@@ -156,16 +168,5 @@ def save_consultation(
     ))
 
     conn.commit()
+    cursor.close()
     conn.close()
-
-def get_patient_profile(user_id):
-    conn = get_db()
-
-    patient = conn.execute(
-        "SELECT * FROM patients WHERE user_id=?",
-        (user_id,)
-    ).fetchone()
-
-    conn.close()
-
-    return patient    
