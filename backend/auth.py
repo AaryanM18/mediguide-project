@@ -26,27 +26,30 @@ def verify_password(
 
 def create_user(user_id, email, password):
     conn = get_db()
+    cursor = conn.cursor()
 
-    # check if user_id already exists
-    existing_user = conn.execute(
-        "SELECT * FROM users WHERE id=?",
+    cursor.execute(
+        "SELECT * FROM users WHERE id=%s",
         (user_id,)
-    ).fetchone()
+    )
+    existing_user = cursor.fetchone()
 
     if existing_user:
+        cursor.close()
         conn.close()
         raise HTTPException(
             status_code=400,
             detail="User ID already taken"
         )
 
-    # check if email already exists
-    existing_email = conn.execute(
-        "SELECT * FROM users WHERE email=?",
+    cursor.execute(
+        "SELECT * FROM users WHERE email=%s",
         (email,)
-    ).fetchone()
+    )
+    existing_email = cursor.fetchone()
 
     if existing_email:
+        cursor.close()
         conn.close()
         raise HTTPException(
             status_code=400,
@@ -55,12 +58,13 @@ def create_user(user_id, email, password):
 
     hashed = hash_password(password)
 
-    conn.execute(
-        "INSERT INTO users (id, email, password) VALUES (?, ?, ?)",
+    cursor.execute(
+        "INSERT INTO users (id, email, password) VALUES (%s, %s, %s)",
         (user_id, email, hashed)
     )
 
     conn.commit()
+    cursor.close()
     conn.close()
 
     return user_id
@@ -68,20 +72,26 @@ def create_user(user_id, email, password):
 
 def authenticate_user(email, password):
     conn = get_db()
+    cursor = conn.cursor()
 
-    user = conn.execute(
-        "SELECT * FROM users WHERE email=?",
+    cursor.execute(
+        "SELECT * FROM users WHERE email=%s",
         (email,)
-    ).fetchone()
+    )
 
+    user = cursor.fetchone()
+
+    cursor.close()
     conn.close()
 
     if not user:
         return False
 
+    stored_password = user[2]
+
     if not verify_password(
         password,
-        user["password"]
+        stored_password
     ):
         return False
 
