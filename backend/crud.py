@@ -164,7 +164,7 @@ def save_consultation(
         remedy_name,
         potency,
         condition,
-        consult_doctor
+        bool(consult_doctor)
     ))
 
     conn.commit()

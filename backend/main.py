@@ -202,7 +202,8 @@ def consult(req: ConsultRequest):
         row.get("remedy_name"),
         row.get("potency"),
         row.get("possible_condition"),
-        1
+        True
+        
     )
 
     safety_warnings = apply_safety_checks(

@@ -127,8 +127,13 @@ def map_symptom_to_category(symptom):
 def filter_dataset_by_category(subcategory):
     print("Filtering by:", subcategory)
 
-    filtered = df[
-        df["symptom"].str.lower().str.contains(
+    dataset = get_df()   # IMPORTANT FIX
+
+    if dataset is None:
+        raise ValueError("Dataset could not be loaded")
+
+    filtered = dataset[
+        dataset["symptom"].str.contains(
             subcategory.lower(),
             na=False
         )
@@ -138,7 +143,7 @@ def filter_dataset_by_category(subcategory):
 
     if filtered.empty:
         print("No filtered rows, using full dataset")
-        return df
+        return dataset
 
     return filtered
 
