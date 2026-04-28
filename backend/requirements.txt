@@ -5,7 +5,7 @@ uvicorn==0.46.0
 sentence-transformers==5.4.1
 torch==2.11.0+cpu
 passlib==1.7.4
-bcrypt==4.0.1
+bcrypt
 psycopg2-binary==2.9.12
 python-dotenv
 pandas

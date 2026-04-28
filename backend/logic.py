@@ -1,7 +1,9 @@
 import pandas as pd
 import os
 import json
-# Heavy imports (torch, sentence_transformers) are deferred to functions
+from sentence_transformers import SentenceTransformer, util
+import torch
+
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -44,7 +46,6 @@ model = None
 def get_model():
     global model
     if model is None:
-        from sentence_transformers import SentenceTransformer
         model = SentenceTransformer("all-MiniLM-L6-v2")
     return model
 
@@ -73,9 +74,6 @@ def build_embeddings():
 
 # Semantic symptom matching
 def smart_symptom_match(user_input):
-    from sentence_transformers import util
-    import torch
-    
     build_embeddings()
     model = get_model()
 
