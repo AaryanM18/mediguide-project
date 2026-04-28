@@ -45,7 +45,7 @@ const getBaseUrl = () => {
     return isLocal ? 'http://127.0.0.1:8000' : 'https://mediguide-3jm3.onrender.com';
 };
 
-const BASE_URL = "http://127.0.0.1:8000";
+const BASE_URL = getBaseUrl();
 
 export const loginUser = async (email, password) => {
   const res = await fetch(`${BASE_URL}/api/auth/login`, {
