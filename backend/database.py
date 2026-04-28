@@ -2,12 +2,13 @@ import psycopg2
 import os
 
 
-DATABASE_URL = os.getenv("postgresql://mediguide_user:4WaLZYxO9irJO25bVp3ceVf18eSgzSCZ@dpg-d7nm2enlk1mc73forcs0-a.singapore-postgres.render.com/mediguide_2btg")
+NEON_URL = "postgresql://neondb_owner:npg_SeijqlHh7NG3@ep-shy-firefly-an0xw4m1-pooler.c-6.us-east-1.aws.neon.tech/neondb?sslmode=require"
+DATABASE_URL = os.getenv("DATABASE_URL", NEON_URL)
 
 
 def get_db():
     try:
-        conn = psycopg2.connect("postgresql://mediguide_user:4WaLZYxO9irJO25bVp3ceVf18eSgzSCZ@dpg-d7nm2enlk1mc73forcs0-a.singapore-postgres.render.com/mediguide_2btg")
+        conn = psycopg2.connect(DATABASE_URL)
         print("Database connected successfully")
         return conn
     except Exception as e:
