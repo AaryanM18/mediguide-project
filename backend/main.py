@@ -1,29 +1,45 @@
 from fastapi import FastAPI, HTTPException
+print("✅ FastAPI imported")
+
 from fastapi.middleware.cors import CORSMiddleware
+print("✅ CORS imported")
 
 
 from auth import (
     create_user,
     authenticate_user
 )
+print("✅ auth.py imported")
+
+
 from schemas import (
     UserSignup,
     UserLogin
 )
+print("✅ auth schemas imported")
+
 
 from database import init_db
+print("✅ database.py imported")
+
+
 from schemas import (
     PatientProfile,
     ConsultRequest
 )
+print("✅ patient schemas imported")
+
+
 from crud import (
     register_patient,
     get_patient_from_db,
     save_consultation
 )
+print("✅ crud.py imported")
+
 
 from logic import (
-    df,
+    get_df,
     smart_symptom_match,
     find_row,
     build_response,
@@ -34,11 +50,16 @@ from logic import (
     enrich_symptom_context,
     apply_safety_checks
 )
+print("✅ logic.py imported")
+
 
 app = FastAPI(
     title="SmartHomeoAIAdvisor API",
     version="2.0"
 )
+
+print("✅ FastAPI app created")
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -47,7 +68,11 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
+print("✅ Middleware added")
+
+
 init_db()
+print("✅ Database initialized")
 
 
 @app.get("/")
@@ -56,13 +81,14 @@ def health():
         "status": "running"
     }
 
+
 @app.post("/api/auth/signup")
 def signup(user: UserSignup):
     user_id = create_user(
-    user.user_id,
-    user.email,
-    user.password
-)
+        user.user_id,
+        user.email,
+        user.password
+    )
 
     return {
         "success": True,
@@ -92,7 +118,10 @@ def login(user: UserLogin):
 
 
 @app.get("/symptoms")
+@app.get("/symptoms")
 def get_symptoms():
+    df = get_df()
+
     symptoms = sorted(
         df["symptom"].unique().tolist()
     )
@@ -139,23 +168,19 @@ def consult(req: ConsultRequest):
             category_data["subcategory"]
         )
     else:
-        filtered_df = df
-
-    patient = get_patient_from_db(
-    req.user_id
-)
-
-    enriched_input = enrich_symptom_context(
-    intent_symptom,
-    patient
-)
-
-    mapped_symptom = smart_symptom_match(
-    enriched_input
-)
+        filtered_df = get_df()
 
     patient = get_patient_from_db(
         req.user_id
+    )
+
+    enriched_input = enrich_symptom_context(
+        intent_symptom,
+        patient
+    )
+
+    mapped_symptom = smart_symptom_match(
+        enriched_input
     )
 
     row = find_row(
@@ -197,8 +222,8 @@ def consult(req: ConsultRequest):
     )
 
     return {
-    "success": True,
-    "data": response,
-    "warnings": safety_warnings,
-    "message": human_message
-}
+        "success": True,
+        "data": response,
+        "warnings": safety_warnings,
+        "message": human_message
+    }

@@ -20,8 +20,17 @@ SYMPTOM_MAP_PATH = os.path.join(
 
 
 # Load dataset
-df = pd.read_csv(DATASET_PATH)
-df = df.fillna("")
+df = None
+
+def get_df():
+    global df
+    if df is None:
+        temp = pd.read_csv(DATASET_PATH)
+        temp = temp.fillna("")
+        temp["symptom"] = temp["symptom"].str.strip().str.lower()
+        temp["severity"] = temp["severity"].str.strip().str.lower()
+        df = temp
+    return df
 
 # Load symptom mapping layer
 with open(SYMPTOM_MAP_PATH, "r") as f:
@@ -34,30 +43,46 @@ df["severity"] = df["severity"].str.strip().str.lower()
 
 
 # Load semantic model
-model = SentenceTransformer(
-    "all-MiniLM-L6-v2"
-)
+model = None
+
+def get_model():
+    global model
+    if model is None:
+        model = SentenceTransformer("all-MiniLM-L6-v2")
+    return model
 
 # Build symptom memory
-all_symptoms = (
-    df["symptom"]
-    .dropna()
-    .unique()
-    .tolist()
-)
+all_symptoms = None
+symptom_embeddings = None
 
-symptom_embeddings = model.encode(
-    all_symptoms,
-    convert_to_tensor=True
-)
+def build_embeddings():
+    global all_symptoms, symptom_embeddings
 
+    if all_symptoms is None or symptom_embeddings is None:
+        model = get_model()
+        df = get_df()
+
+        all_symptoms = (
+            df["symptom"]
+            .dropna()
+            .unique()
+            .tolist()
+        )
+
+        symptom_embeddings = model.encode(
+            all_symptoms,
+            convert_to_tensor=True
+        )
 
 # Semantic symptom matching
 def smart_symptom_match(user_input):
+    build_embeddings()
+    model = get_model()
+
     user_embedding = model.encode(
-        user_input,
-        convert_to_tensor=True
-    )
+    user_input,
+    convert_to_tensor=True
+)
 
     scores = util.pytorch_cos_sim(
         user_embedding,
