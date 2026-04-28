@@ -37,9 +37,7 @@ with open(SYMPTOM_MAP_PATH, "r") as f:
     symptom_map = json.load(f)
 
 
-# Normalize dataset
-df["symptom"] = df["symptom"].str.strip().str.lower()
-df["severity"] = df["severity"].str.strip().str.lower()
+
 
 
 # Load semantic model
