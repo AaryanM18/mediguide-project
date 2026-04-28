@@ -168,7 +168,7 @@ def consult(req: ConsultRequest):
             category_data["subcategory"]
         )
     else:
-        filtered_df = get_df 
+        filtered_df = get_df()
 
     patient = get_patient_from_db(
         req.user_id
