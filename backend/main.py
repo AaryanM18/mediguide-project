@@ -39,7 +39,7 @@ print("✅ crud.py imported")
 
 
 from logic import (
-    df,
+    get_df,
     smart_symptom_match,
     find_row,
     build_response,
@@ -118,7 +118,10 @@ def login(user: UserLogin):
 
 
 @app.get("/symptoms")
+@app.get("/symptoms")
 def get_symptoms():
+    df = get_df()
+
     symptoms = sorted(
         df["symptom"].unique().tolist()
     )
@@ -165,7 +168,7 @@ def consult(req: ConsultRequest):
             category_data["subcategory"]
         )
     else:
-        filtered_df = df
+        filtered_df = get_df 
 
     patient = get_patient_from_db(
         req.user_id
