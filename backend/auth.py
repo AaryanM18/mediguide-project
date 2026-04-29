@@ -8,10 +8,14 @@ pwd_context = CryptContext(
     deprecated="auto"
 )
 
+def normalize_password(password):
+    return str(password).strip()[:72]
+
 
 def hash_password(password: str):
-    password = str(password).strip()[:72]
-    return pwd_context.hash(password)
+    return pwd_context.hash(
+        normalize_password(password)
+    )
 
 
 def verify_password(
@@ -19,7 +23,7 @@ def verify_password(
     hashed_password
 ):
     return pwd_context.verify(
-        plain_password,
+        normalize_password(plain_password),
         hashed_password
     )
 
