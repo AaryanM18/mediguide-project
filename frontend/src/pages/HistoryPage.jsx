@@ -1,46 +1,64 @@
 import React, { useState, useEffect } from 'react';
 import {
   ChevronLeft,
-  Bookmark,
   ChevronRight,
   Search,
   Activity,
-  Filter
+  CalendarClock
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { getConsultationHistory } from '../services/api';
 
 const HistoryPage = ({ user }) => {
   const navigate = useNavigate();
+
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [filter, setFilter] = useState('all');
 
   useEffect(() => {
     const fetchHistory = async () => {
-      const data = await getConsultationHistory(user.id);
-      if (data.history) {
-        setHistory(data.history.reverse());
+      try {
+        const data = await getConsultationHistory(user.id);
+
+        const rawHistory = data?.history || [];
+
+        const uniqueHistory = rawHistory.filter((item, index, self) => {
+          const key = `${item.symptom}-${item.remedy_name}-${item.potency}-${item.created_at}`;
+
+          return (
+            index ===
+            self.findIndex((record) => {
+              const recordKey = `${record.symptom}-${record.remedy_name}-${record.potency}-${record.created_at}`;
+              return recordKey === key;
+            })
+          );
+        });
+
+        setHistory([...uniqueHistory].reverse());
+      } catch (err) {
+        console.error('History loading failed:', err);
+        setHistory([]);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     fetchHistory();
   }, [user.id]);
 
   const filteredHistory = history.filter((item) => {
-    const name = item.remedy_name || '';
+    const remedy = item.remedy_name || '';
     const symptoms = item.symptom || '';
+    const condition = item.condition || '';
 
-    const matchesSearch =
-      name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      symptoms.toLowerCase().includes(searchQuery.toLowerCase());
+    const q = searchQuery.toLowerCase();
 
-    const matchesFilter =
-      filter === 'all' || (filter === 'saved' && item.is_saved);
-
-    return matchesSearch && matchesFilter;
+    return (
+      remedy.toLowerCase().includes(q) ||
+      symptoms.toLowerCase().includes(q) ||
+      condition.toLowerCase().includes(q)
+    );
   });
 
   return (
@@ -57,7 +75,7 @@ const HistoryPage = ({ user }) => {
 
           <span className="mini-label">Consultation Archive</span>
           <h1>Health Records</h1>
-          <p>Track your homeopathic consultation history</p>
+          <p>Review your previous remedy suggestions and symptom records.</p>
         </div>
 
         <div className="search-and-filter">
@@ -65,89 +83,92 @@ const HistoryPage = ({ user }) => {
             <Search size={18} color="#ddd6fe" />
             <input
               type="text"
-              placeholder="Search symptoms..."
+              placeholder="Search records..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
-          </div>
-
-          <div
-            className={`filter-pill ${filter === 'saved' ? 'active' : ''}`}
-            onClick={() => setFilter(filter === 'all' ? 'saved' : 'all')}
-          >
-            <Filter size={16} color="white" />
-            <span>{filter === 'saved' ? 'Saved' : 'Filter'}</span>
           </div>
         </div>
       </header>
 
       <div className="history-body">
         {loading ? (
-          <div className="loading-state">Accessing medical records...</div>
+          <div className="loading-state">Loading records...</div>
         ) : (
-          <div className="history-list">
-            {filteredHistory.length > 0 ? (
-              filteredHistory.map((item, idx) => (
-                <div
-                  key={idx}
-                  className="history-card slide-up"
-                  style={{ animationDelay: `${idx * 0.04}s` }}
-                  onClick={() =>
-                    navigate(`/remedy/${item.remedy_name}`, { state: item })
-                  }
-                >
-                  <div className="card-top">
-                    <div
-                      className={`severity-dot ${
-                        item.severity === 'high'
-                          ? 'high'
-                          : item.severity === 'moderate'
-                          ? 'moderate'
-                          : 'low'
-                      }`}
-                    ></div>
+          <>
+            <div className="record-summary">
+              <div>
+                <span>Total Records</span>
+                <strong>{history.length}</strong>
+              </div>
 
-                    <span className="timestamp">
-                      {item.created_at || 'Recent'}
-                    </span>
+              <div>
+                <span>Showing</span>
+                <strong>{filteredHistory.length}</strong>
+              </div>
+            </div>
 
-                    {item.is_saved && (
-                      <Bookmark
-                        size={14}
-                        fill="#ddd6fe"
-                        color="#ddd6fe"
-                        className="saved-icon"
-                      />
-                    )}
-                  </div>
+            <div className="history-list">
+              {filteredHistory.length > 0 ? (
+                filteredHistory.map((item, idx) => (
+                  <div
+                    key={`${item.remedy_name}-${item.created_at}-${idx}`}
+                    className="history-card slide-up"
+                    style={{ animationDelay: `${idx * 0.04}s` }}
+                    onClick={() =>
+                      navigate(`/remedy/${encodeURIComponent(item.remedy_name)}`, { state: item })
+                    }
+                  >
+                    <div className="card-top">
+                      <div className="record-icon">
+                        <CalendarClock size={18} />
+                      </div>
 
-                  <div className="card-main">
-                    <div className="symptom-info">
-                      <h3>{item.symptom}</h3>
-                      <p className="remedy-preview">
-                        {item.remedy_name} {item.potency}
-                      </p>
+                      <span className="timestamp">
+                        {item.created_at || 'Recent'}
+                      </span>
                     </div>
 
-                    <button className="view-details">
-                      <ChevronRight size={20} color="#ddd6fe" />
-                    </button>
-                  </div>
+                    <div className="card-main">
+                      <div className="symptom-info">
+                        <h3>{item.symptom || 'Recorded Consultation'}</h3>
 
-                  <div className="card-glow"></div>
+                        <p className="remedy-preview">
+                          {item.remedy_name || 'Remedy not found'} {item.potency || ''}
+                        </p>
+
+                        {item.condition && (
+                          <p className="condition-preview">
+                            {item.condition}
+                          </p>
+                        )}
+                      </div>
+
+                      <button className="view-details">
+                        <ChevronRight size={20} color="#ddd6fe" />
+                      </button>
+                    </div>
+
+                    <div className="card-glow"></div>
+                  </div>
+                ))
+              ) : (
+                <div className="no-history">
+                  <Activity size={64} color="#8f56eb" strokeWidth={1.2} />
+                  <h3>No records found</h3>
+                  <p>
+                    {searchQuery
+                      ? 'No records match your search.'
+                      : 'Your consultation history will appear here.'}
+                  </p>
+
+                  <button className="start-btn" onClick={() => navigate('/find')}>
+                    Start Consultation
+                  </button>
                 </div>
-              ))
-            ) : (
-              <div className="no-history">
-                <Activity size={64} color="#8f56eb" strokeWidth={1.2} />
-                <h3>No records found</h3>
-                <p>No records found matching your search.</p>
-                <button className="start-btn" onClick={() => navigate('/find')}>
-                  Get a Consultation
-                </button>
-              </div>
-            )}
-          </div>
+              )}
+            </div>
+          </>
         )}
       </div>
 
@@ -277,6 +298,7 @@ color:var(--primary-300);
 font-size:14px;
 line-height:1.45;
 margin-bottom:22px;
+max-width:310px;
 }
 
 .search-and-filter{
@@ -315,32 +337,40 @@ width:100%;
 color:#ddd6fe;
 }
 
-.filter-pill{
-border-radius:100px;
-padding:0 18px;
-background:rgba(255,255,255,.14);
-backdrop-filter:blur(14px);
-border:1px solid rgba(255,255,255,.22);
-display:flex;
-align-items:center;
-gap:8px;
-cursor:pointer;
-box-shadow:
-inset 0 1px 0 rgba(255,255,255,.16);
-}
-
-.filter-pill.active{
-background:rgba(255,255,255,.24);
-}
-
-.filter-pill span{
-font-size:12px;
-font-weight:800;
-color:white;
-}
-
 .history-body{
-padding:30px 24px;
+padding:26px 24px;
+}
+
+.record-summary{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:14px;
+margin-bottom:22px;
+}
+
+.record-summary div{
+background:
+linear-gradient(145deg,#ffffff,#f4eeff);
+border:1px solid rgba(143,86,235,.10);
+border-radius:22px;
+padding:16px;
+box-shadow:0 12px 24px rgba(143,86,235,.08);
+}
+
+.record-summary span{
+display:block;
+font-size:11px;
+font-weight:900;
+text-transform:uppercase;
+letter-spacing:.5px;
+color:var(--primary-700);
+margin-bottom:4px;
+}
+
+.record-summary strong{
+font-size:22px;
+font-weight:900;
+color:var(--text-dark);
 }
 
 .history-list{
@@ -388,13 +418,6 @@ border-radius:50%;
 background:rgba(255,255,255,.08);
 }
 
-.history-card:hover{
-transform:translateY(-3px);
-box-shadow:
-0 22px 44px rgba(143,86,235,.32),
-0 5px 14px rgba(76,29,149,.16);
-}
-
 .history-card:active{
 transform:scale(.97);
 }
@@ -408,26 +431,16 @@ position:relative;
 z-index:1;
 }
 
-.severity-dot{
-width:9px;
-height:9px;
-border-radius:50%;
-box-shadow:0 0 8px currentColor;
-}
-
-.severity-dot.high{
-background:#ef4444;
-color:#ef4444;
-}
-
-.severity-dot.moderate{
-background:#f59e0b;
-color:#f59e0b;
-}
-
-.severity-dot.low{
-background:#34d399;
-color:#34d399;
+.record-icon{
+width:34px;
+height:34px;
+border-radius:12px;
+background:rgba(255,255,255,.14);
+border:1px solid rgba(255,255,255,.18);
+display:flex;
+align-items:center;
+justify-content:center;
+color:#ddd6fe;
 }
 
 .timestamp{
@@ -438,16 +451,17 @@ text-transform:uppercase;
 letter-spacing:.5px;
 }
 
-.saved-icon{
-margin-left:auto;
-}
-
 .card-main{
 display:flex;
 justify-content:space-between;
 align-items:center;
+gap:14px;
 position:relative;
 z-index:1;
+}
+
+.symptom-info{
+flex:1;
 }
 
 .symptom-info h3{
@@ -459,8 +473,16 @@ color:white;
 
 .remedy-preview{
 font-size:13px;
-font-weight:700;
+font-weight:800;
 color:var(--primary-300);
+}
+
+.condition-preview{
+font-size:12px;
+font-weight:600;
+color:#ede9fe;
+margin-top:5px;
+line-height:1.4;
 }
 
 .view-details{
@@ -472,6 +494,7 @@ border-radius:14px;
 display:flex;
 align-items:center;
 justify-content:center;
+flex-shrink:0;
 }
 
 .card-glow{
@@ -550,23 +573,20 @@ padding:74px 20px 30px;
 }
 
 .history-body{
-padding:28px 18px;
-}
-
-.search-and-filter{
-gap:10px;
-}
-
-.filter-pill{
-padding:0 14px;
+padding:24px 18px;
 }
 
 .history-card{
 padding:20px;
+border-radius:26px;
 }
 
 .symptom-info h3{
 font-size:17px;
+}
+
+.record-summary{
+gap:10px;
 }
 }
       `}</style>

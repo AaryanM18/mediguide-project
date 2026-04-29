@@ -32,24 +32,24 @@ password:''
 
 const navigate=useNavigate();
 
-const parseBackendError=(err)=>{
+const parseBackendError = (err) => {
+  if (!err) return 'Unknown error';
 
-if(!err) return 'Unknown error';
+  if (typeof err === 'string') return err;
 
-if(typeof err==='string') return err;
+  if (typeof err.detail === 'string') return err.detail;
 
-if(typeof err.detail==='string'){
-return err.detail;
-}
+  if (Array.isArray(err.detail)) {
+    return err.detail.map(e => e.msg || JSON.stringify(e)).join(', ');
+  }
 
-if(Array.isArray(err.detail)){
-return err.detail.map(
-e=>e.msg || JSON.stringify(e)
-).join(', ');
-}
+  if (err.message) return err.message;
 
-return 'Signup failed.';
-
+  try {
+    return JSON.stringify(err);
+  } catch {
+    return 'Signup failed.';
+  }
 };
 
 const handleSubmit=async(e)=>{
@@ -69,6 +69,24 @@ return;
 
 if(!age || age<1 || age>120){
 setError('Enter valid age');
+setLoading(false);
+return;
+}
+
+if(!formData.email.trim()){
+setError('Email required');
+setLoading(false);
+return;
+}
+
+if(!formData.password.trim()){
+setError('Password required');
+setLoading(false);
+return;
+}
+
+if(formData.password.length<6){
+setError('Password must be at least 6 characters');
 setLoading(false);
 return;
 }

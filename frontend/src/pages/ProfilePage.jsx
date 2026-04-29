@@ -8,7 +8,10 @@ History,
 LogOut,
 Heart,
 Activity,
-Calendar
+Calendar,
+MessageCircle,
+X,
+Send
 } from 'lucide-react';
 
 import {useNavigate} from 'react-router-dom';
@@ -20,6 +23,8 @@ const navigate=useNavigate();
 
 const [profile,setProfile]=useState(null);
 const [loading,setLoading]=useState(true);
+const [showFeedback,setShowFeedback]=useState(false);
+const [feedback,setFeedback]=useState('');
 
 useEffect(()=>{
 
@@ -36,6 +41,19 @@ setLoading(false);
 fetch();
 
 },[user.id]);
+
+const handleFeedbackSubmit=()=>{
+if(!feedback.trim()){
+alert('Please write your feedback first.');
+return;
+}
+
+console.log('Feedback:',feedback);
+
+alert('Thank you for your feedback!');
+setFeedback('');
+setShowFeedback(false);
+};
 
 return(
 
@@ -78,7 +96,7 @@ Patient Identity
 <div className="snapshot-icon">
 <Calendar size={18}/>
 </div>
-<span>{profile.age} Years</span>
+<span>{profile.age || 'Not set'}</span>
 <small>Age</small>
 </div>
 
@@ -140,14 +158,33 @@ onClick={()=>navigate('/history')}
 <ChevronLeft size={18} className="rotate-180"/>
 </div>
 
-<div className="menu-item">
+<div
+className="menu-item"
+onClick={()=>setShowFeedback(true)}
+>
+<div className="menu-icon">
+<MessageCircle size={20}/>
+</div>
+
+<div className="menu-text">
+<span>Feedback & Support</span>
+<p>Share suggestions or report an issue</p>
+</div>
+
+<ChevronLeft size={18} className="rotate-180"/>
+</div>
+
+<div
+className="menu-item"
+onClick={()=>alert('App preferences will be available in a future update.')}
+>
 <div className="menu-icon">
 <Settings size={20}/>
 </div>
 
 <div className="menu-text">
-<span>Settings</span>
-<p>Manage app preferences</p>
+<span>App Preferences</span>
+<p>Manage app options and display settings</p>
 </div>
 
 <ChevronLeft size={18} className="rotate-180"/>
@@ -167,6 +204,50 @@ navigate('/login');
 </button>
 
 </div>
+
+{showFeedback && (
+
+<div className="modal-backdrop">
+
+<div className="feedback-modal">
+
+<button
+className="modal-close"
+onClick={()=>setShowFeedback(false)}
+>
+<X size={22}/>
+</button>
+
+<span className="modal-label">
+Feedback
+</span>
+
+<h2>Help Us Improve</h2>
+
+<p>
+Share what feels confusing, broken, or missing in the app.
+</p>
+
+<textarea
+className="feedback-input"
+placeholder="Write your feedback here..."
+value={feedback}
+onChange={(e)=>setFeedback(e.target.value)}
+/>
+
+<button
+className="feedback-submit"
+onClick={handleFeedbackSubmit}
+>
+<Send size={18}/>
+Submit Feedback
+</button>
+
+</div>
+
+</div>
+
+)}
 
 <style>{`
 
@@ -515,6 +596,162 @@ box-shadow:
 
 .logout-btn:active{
 transform:scale(.98);
+}
+
+/* FEEDBACK MODAL */
+
+.modal-backdrop{
+position:fixed;
+inset:0;
+z-index:999;
+
+background:rgba(36,20,63,.56);
+backdrop-filter:blur(8px);
+
+display:flex;
+align-items:flex-end;
+justify-content:center;
+
+padding:18px;
+
+animation:fadeOverlay .25s ease;
+}
+
+.feedback-modal{
+width:100%;
+max-width:440px;
+
+background:
+linear-gradient(180deg,#ffffff,#f4eeff);
+
+border-radius:32px 32px 24px 24px;
+
+padding:26px 22px 22px;
+
+box-shadow:
+0 -12px 40px rgba(0,0,0,.20);
+
+position:relative;
+
+animation:slideModal .28s ease;
+}
+
+.modal-close{
+position:absolute;
+right:18px;
+top:18px;
+
+width:40px;
+height:40px;
+
+border:none;
+border-radius:14px;
+
+background:#f1e8ff;
+color:#6d28d9;
+
+display:flex;
+align-items:center;
+justify-content:center;
+}
+
+.modal-label{
+font-size:11px;
+font-weight:900;
+letter-spacing:.7px;
+text-transform:uppercase;
+color:#6d28d9;
+}
+
+.feedback-modal h2{
+font-size:24px;
+font-weight:900;
+color:#24143f;
+margin:8px 0 6px;
+}
+
+.feedback-modal p{
+font-size:13px;
+font-weight:600;
+line-height:1.5;
+color:#7c6f9a;
+margin-bottom:18px;
+}
+
+.feedback-input{
+width:100%;
+min-height:130px;
+
+resize:none;
+
+border:none;
+outline:none;
+
+border-radius:20px;
+
+padding:16px;
+
+font-family:inherit;
+font-size:14px;
+font-weight:600;
+line-height:1.5;
+
+color:#24143f;
+
+background:white;
+
+box-shadow:
+inset 0 0 0 1px rgba(143,86,235,.14),
+0 10px 22px rgba(143,86,235,.06);
+
+margin-bottom:16px;
+}
+
+.feedback-submit{
+width:100%;
+height:56px;
+
+border:none;
+border-radius:18px;
+
+background:
+linear-gradient(135deg,#2d0a54,#5b21b6,#8f56eb);
+
+color:white;
+font-size:15px;
+font-weight:900;
+
+display:flex;
+align-items:center;
+justify-content:center;
+gap:10px;
+
+box-shadow:
+0 14px 28px rgba(143,86,235,.24);
+}
+
+.feedback-submit:active{
+transform:scale(.98);
+}
+
+@keyframes fadeOverlay{
+from{
+opacity:0;
+}
+to{
+opacity:1;
+}
+}
+
+@keyframes slideModal{
+from{
+opacity:0;
+transform:translateY(36px);
+}
+to{
+opacity:1;
+transform:translateY(0);
+}
 }
 
 /* MOBILE */

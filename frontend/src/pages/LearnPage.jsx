@@ -1,39 +1,51 @@
 import React, { useState, useEffect } from 'react';
 import {
 ChevronLeft,
-Droplets,
 BookOpen,
 Search,
 Pill,
 ChevronRight,
 Scale,
-ScrollText
+ScrollText,
+Library,
+Sparkles
 } from 'lucide-react';
 
 import { useNavigate } from 'react-router-dom';
 import { searchLibrary } from '../services/api';
 
 const LearnPage = () => {
-
 const navigate = useNavigate();
+
+const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 
 const [searchQuery,setSearchQuery]=useState('');
 const [results,setResults]=useState([]);
 const [loading,setLoading]=useState(false);
 const [activeTab,setActiveTab]=useState('library');
+const [activeLetter,setActiveLetter]=useState('A');
 
 useEffect(()=>{
-
-const fetchInitial=async()=>{
-setLoading(true);
-const initial=await searchLibrary('');
-setResults(initial);
-setLoading(false);
-};
-
-fetchInitial();
-
+loadByLetter('A');
 },[]);
+
+const loadByLetter=async(letter)=>{
+try{
+setLoading(true);
+setActiveLetter(letter);
+setSearchQuery('');
+
+const data=await searchLibrary(letter);
+setResults(data || []);
+}
+catch(err){
+console.error('Library load failed:',err);
+setResults([]);
+}
+finally{
+setLoading(false);
+}
+};
 
 const handleSearch=async(e)=>{
 const q=e.target.value;
@@ -43,49 +55,70 @@ if(activeTab!=='library'){
 setActiveTab('library');
 }
 
+try{
 setLoading(true);
 
-const searchResults=await searchLibrary(q);
-setResults(searchResults);
+if(!q.trim()){
+const data=await searchLibrary(activeLetter);
+setResults(data || []);
+return;
+}
 
+const searchResults=await searchLibrary(q);
+setResults(searchResults || []);
+}
+catch(err){
+console.error('Search failed:',err);
+setResults([]);
+}
+finally{
 setLoading(false);
+}
 };
 
 const referenceBooks=[
 {
 name:"Organon of Medicine",
 author:"Samuel Hahnemann",
-desc:"Philosophical foundation of homeopathy."
-},
-{
-name:"Materia Medica Pura",
-author:"Samuel Hahnemann",
-desc:"Pure remedy provings and symptoms."
+desc:"Foundation of homeopathic philosophy, case taking and principles.",
+action:()=>navigate('/philosophy')
 },
 {
 name:"Boericke's Materia Medica",
 author:"William Boericke",
-desc:"Clinical descriptions of remedies."
+desc:"Clinical descriptions, keynote symptoms and remedy relationships.",
+action:()=>setActiveTab('library')
 },
 {
 name:"Allen's Keynotes",
-author:"H.C Allen",
-desc:"Keynote symptoms for remedy choice."
+author:"H.C. Allen",
+desc:"Characteristic keynote symptoms used for remedy differentiation.",
+action:()=>setActiveTab('library')
+},
+{
+name:"Materia Medica Pura",
+author:"Samuel Hahnemann",
+desc:"Original proving records and symptom observations.",
+action:()=>setActiveTab('library')
 }
 ];
 
 const healthPrinciples=[
 {
-title:"Avoid Strong Smells",
-desc:"Camphor, coffee and perfumes may antidote remedies."
+title:"Like Cures Like",
+desc:"A substance producing symptoms in a healthy person may help similar symptoms in a patient."
 },
 {
-title:"Clean Palate",
-desc:"Wait before or after food before taking medicines."
+title:"Minimum Dose",
+desc:"The smallest effective dose is preferred to stimulate the body's response gently."
 },
 {
-title:"Holistic View",
-desc:"Treats the person not merely disease."
+title:"Totality of Symptoms",
+desc:"Remedy selection considers physical, mental and emotional symptoms together."
+},
+{
+title:"Individualization",
+desc:"Two people with the same complaint may need different remedies based on their constitution."
 }
 ];
 
@@ -94,8 +127,7 @@ return(
 
 <header className="learn-header">
 
-<button className="back-btn"
-onClick={()=>navigate(-1)}>
+<button className="back-btn" onClick={()=>navigate(-1)}>
 <ChevronLeft size={24} color="white"/>
 </button>
 
@@ -106,28 +138,26 @@ onClick={()=>navigate(-1)}>
 </div>
 
 <span className="mini-label">
-Knowledge Hub
+Classical Knowledge
 </span>
 
 <h1>Knowledge Hub</h1>
 
 <p className="subtitle">
-Explore libraries, principles and historical reference books.
+Explore remedies, principles and classical references.
 </p>
 
 </div>
 
 <div className="search-bar-container">
-
 <Search size={18} color="#ddd6fe"/>
 
 <input
 type="search"
-placeholder="Search medicines or symptoms..."
+placeholder="Search remedies or symptoms..."
 value={searchQuery}
 onChange={handleSearch}
 />
-
 </div>
 
 <div className="tab-switcher">
@@ -136,14 +166,14 @@ onChange={handleSearch}
 className={activeTab==='library'?'active':''}
 onClick={()=>setActiveTab('library')}
 >
-Library
+Materia Medica
 </button>
 
 <button
 className={activeTab==='knowledge'?'active':''}
 onClick={()=>setActiveTab('knowledge')}
 >
-Health Tips
+Principles
 </button>
 
 </div>
@@ -156,8 +186,21 @@ Health Tips
 
 <div className="results-section">
 
-{searchQuery==='' && (
+{!searchQuery && (
+<div className="alphabet-scroll">
+{letters.map(letter=>(
+<button
+key={letter}
+className={activeLetter===letter?'active-letter':''}
+onClick={()=>loadByLetter(letter)}
+>
+{letter}
+</button>
+))}
+</div>
+)}
 
+{searchQuery==='' && (
 <div className="info-cards-row">
 
 <div
@@ -165,41 +208,53 @@ className="mini-info-card"
 onClick={()=>navigate('/philosophy')}
 >
 <Scale size={20}/>
-<span>Organon (§)</span>
+<span>Organon</span>
 </div>
 
-<div className="mini-info-card">
-<Droplets size={20}/>
-<span>Potency</span>
+<div
+className="mini-info-card"
+onClick={()=>setActiveTab('knowledge')}
+>
+<Sparkles size={20}/>
+<span>Principles</span>
 </div>
 
 </div>
-
 )}
 
 <h3 className="section-title">
 {searchQuery
 ?`Search Results (${results.length})`
-:'Materia Medica (A-Z)'
+:`Materia Medica (${activeLetter})`
 }
 </h3>
 
 {loading ? (
 
 <div className="loading-state">
-Consulting the archives...
+Loading knowledge archive...
 </div>
 
 ):(
 
 <div className="remedy-list">
 
-{results.map((rem,idx)=>(
+{results.length===0 ? (
+
+<div className="empty-state">
+<Library size={34}/>
+<h4>No records found</h4>
+<p>Try another letter or search term.</p>
+</div>
+
+):(
+
+results.map((rem,idx)=>(
 
 <div
-key={idx}
+key={`${rem.name}-${idx}`}
 className="remedy-list-item slide-up"
-style={{animationDelay:`${idx*.04}s`}}
+style={{animationDelay:`${idx*.025}s`}}
 onClick={()=>navigate(
 `/remedy-library/${encodeURIComponent(rem.name)}`,
 {state:rem}
@@ -219,7 +274,9 @@ onClick={()=>navigate(
 
 </div>
 
-))}
+))
+
+)}
 
 </div>
 
@@ -242,7 +299,11 @@ Reference Books
 
 {referenceBooks.map((book,i)=>(
 
-<div key={i} className="book-card">
+<div
+key={i}
+className="book-card"
+onClick={book.action}
+>
 <h4>{book.name}</h4>
 <span className="author">
 {book.author}
@@ -260,7 +321,7 @@ Reference Books
 
 <h3 className="section-title">
 <ScrollText size={20}/>
-Health Principles
+Core Principles
 </h3>
 
 {healthPrinciples.map((tip,i)=>(
@@ -364,6 +425,8 @@ justify-content:center;
 box-shadow:
 0 14px 28px rgba(0,0,0,.16),
 inset 0 1px 0 rgba(255,255,255,.16);
+
+z-index:3;
 }
 
 .header-icon-orb{
@@ -381,6 +444,8 @@ justify-content:center;
 margin:0 auto 16px;
 
 backdrop-filter:blur(14px);
+position:relative;
+z-index:2;
 }
 
 .mini-label{
@@ -389,6 +454,8 @@ font-weight:800;
 color:var(--primary-300);
 text-transform:uppercase;
 letter-spacing:.7px;
+position:relative;
+z-index:2;
 }
 
 .learn-header h1{
@@ -396,12 +463,16 @@ font-size:30px;
 font-weight:900;
 color:white;
 margin:8px 0;
+position:relative;
+z-index:2;
 }
 
 .subtitle{
 font-size:14px;
 color:var(--primary-300);
 margin-bottom:22px;
+position:relative;
+z-index:2;
 }
 
 .search-bar-container{
@@ -418,6 +489,8 @@ align-items:center;
 gap:10px;
 
 margin-bottom:20px;
+position:relative;
+z-index:2;
 }
 
 .search-bar-container input{
@@ -430,14 +503,20 @@ font-weight:700;
 color:white;
 }
 
+.search-bar-container input::placeholder{
+color:#ddd6fe;
+}
+
 .tab-switcher{
 display:flex;
 background:rgba(255,255,255,.08);
 padding:4px;
 gap:4px;
 border-radius:100px;
-max-width:280px;
+max-width:310px;
 margin:auto;
+position:relative;
+z-index:2;
 }
 
 .tab-switcher button{
@@ -448,6 +527,7 @@ padding:10px;
 border-radius:100px;
 color:#c4b5fd;
 font-weight:800;
+font-size:13px;
 }
 
 .tab-switcher button.active{
@@ -456,7 +536,38 @@ color:white;
 }
 
 .learn-body{
-padding:28px 24px;
+padding:26px 24px 90px;
+}
+
+.alphabet-scroll{
+display:flex;
+overflow-x:auto;
+gap:10px;
+margin-bottom:22px;
+padding-bottom:8px;
+scrollbar-width:none;
+}
+
+.alphabet-scroll::-webkit-scrollbar{
+display:none;
+}
+
+.alphabet-scroll button{
+min-width:42px;
+height:42px;
+border:none;
+border-radius:14px;
+font-weight:900;
+background:#efe7ff;
+color:#7c3aed;
+box-shadow:0 8px 16px rgba(143,86,235,.08);
+}
+
+.alphabet-scroll button.active-letter{
+background:
+linear-gradient(135deg,#4c1d95,#8f56eb);
+color:white;
+box-shadow:0 12px 22px rgba(143,86,235,.22);
 }
 
 .info-cards-row{
@@ -469,7 +580,6 @@ margin-bottom:24px;
 .remedy-list-item,
 .book-card,
 .tip-card{
-
 background:
 linear-gradient(
 145deg,
@@ -539,6 +649,13 @@ display:flex;
 align-items:center;
 justify-content:center;
 color:#ddd6fe;
+flex-shrink:0;
+}
+
+.rem-info{
+flex:1;
+position:relative;
+z-index:1;
 }
 
 .rem-info h4{
@@ -562,6 +679,7 @@ gap:14px;
 padding:18px;
 border-radius:24px;
 color:white;
+cursor:pointer;
 }
 
 .book-card h4{
@@ -579,7 +697,7 @@ color:#c4b5fd;
 
 .book-card p{
 font-size:11px;
-line-height:1.4;
+line-height:1.45;
 }
 
 .knowledge-block{
@@ -608,6 +726,7 @@ align-items:center;
 justify-content:center;
 
 font-weight:900;
+flex-shrink:0;
 }
 
 .tip-text h5{
@@ -619,13 +738,65 @@ margin-bottom:4px;
 .tip-text p{
 font-size:12px;
 color:#ddd6fe;
+line-height:1.45;
 }
 
 .loading-state{
 text-align:center;
-padding:50px;
+padding:50px 20px;
 font-weight:900;
 color:#7c3aed;
+}
+
+.empty-state{
+padding:40px 20px;
+border-radius:26px;
+background:linear-gradient(145deg,#ffffff,#f4eeff);
+text-align:center;
+color:#7c3aed;
+box-shadow:0 12px 24px rgba(143,86,235,.08);
+}
+
+.empty-state h4{
+font-size:17px;
+font-weight:900;
+color:#24143f;
+margin:10px 0 4px;
+}
+
+.empty-state p{
+font-size:13px;
+font-weight:600;
+color:#6d6290;
+}
+
+.remedy-list-item:active,
+.book-card:active,
+.tip-card:active,
+.mini-info-card:active,
+.alphabet-scroll button:active{
+transform:scale(.98);
+}
+
+@media(max-width:480px){
+
+.learn-header{
+padding:72px 20px 30px;
+}
+
+.learn-body{
+padding:24px 18px 90px;
+}
+
+.books-grid{
+grid-template-columns:1fr;
+}
+
+.remedy-list-item{
+padding:16px;
+border-radius:24px;
+}
+
 }
 
 `}</style>

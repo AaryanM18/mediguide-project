@@ -10,7 +10,6 @@ class UserSignup(BaseModel):
     email: str
     password: str
 
-
 class UserLogin(BaseModel):
     email: str
     password: str
@@ -51,14 +50,16 @@ class PatientProfile(BaseModel):
     stress_level: Optional[str] = ""
     energy_level: Optional[str] = ""
 
-
 class ConsultRequest(BaseModel):
     user_id: str
     symptom: str
     severity: str
 
-
 class RemedyRequest(BaseModel):
     symptom: str
     severity: str
     patient: Optional[dict] = {}
+
+class HistorySyncRequest(BaseModel):
+    user_id: str
+    data: List[dict]

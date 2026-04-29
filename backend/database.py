@@ -79,6 +79,14 @@ def init_db():
             )
         """)
 
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS saved_remedies (
+                user_id TEXT,
+                data JSONB,
+                PRIMARY KEY (user_id)
+            )
+        """)
+
         conn.commit()
         print("Tables created successfully")
 

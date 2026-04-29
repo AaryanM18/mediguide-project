@@ -1,15 +1,24 @@
 import React, { useEffect, useState } from 'react';
 import {
   User, Activity, Lightbulb, Folder, Brain,
-  ThermometerSun, Leaf, ScanHeart, BookOpen, Moon, Zap, Flame, Utensils
+  ThermometerSun, Leaf, ScanHeart, BookOpen, Moon, Zap, Flame, Utensils, X
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { getHealthFacts, getPatientProfile } from '../services/api';
+import { getHealthFacts, getPatientProfile, registerPatient } from '../services/api';
 
 const HomePage = ({ user }) => {
   const navigate = useNavigate();
   const [factIndex, setFactIndex] = useState(0);
   const [profile, setProfile] = useState(null);
+  const [showConstitutionModal, setShowConstitutionModal] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  const [constitutionalForm, setConstitutionalForm] = useState({
+    sleep_quality: '',
+    stress_level: '',
+    energy_level: '',
+    appetite_level: ''
+  });
 
   const [facts, setFacts] = useState([
     "Homeopathy works on the principle of 'Like Cures Like'.",
@@ -24,7 +33,15 @@ const HomePage = ({ user }) => {
 
         if (user?.id) {
           const res = await getPatientProfile(user.id);
-          if (res.success && res.patient) setProfile(res.patient);
+          if (res.success && res.patient) {
+            setProfile(res.patient);
+            setConstitutionalForm({
+              sleep_quality: res.patient.sleep_quality || '',
+              stress_level: res.patient.stress_level || '',
+              energy_level: res.patient.energy_level || '',
+              appetite_level: res.patient.appetite_level || ''
+            });
+          }
         }
       } catch (err) {
         console.error('Home data loading failed:', err);
@@ -59,6 +76,73 @@ const HomePage = ({ user }) => {
 
   const displayValue = (value) => value && value !== '' ? value : 'Not set';
 
+  const handleOpenConstitutionModal = () => {
+    setConstitutionalForm({
+      sleep_quality: profile?.sleep_quality || '',
+      stress_level: profile?.stress_level || '',
+      energy_level: profile?.energy_level || '',
+      appetite_level: profile?.appetite_level || ''
+    });
+
+    setShowConstitutionModal(true);
+  };
+
+  const handleSaveConstitution = async () => {
+    try {
+      setSaving(true);
+
+      const updatedProfile = {
+        ...(profile || {}),
+        user_id: user.id,
+        name: profile?.name || user.name || '',
+        age: Number(profile?.age || user.age || 0),
+        gender: profile?.gender || user.gender || '',
+
+        existing_conditions: profile?.existing_conditions || [],
+        allergies: profile?.allergies || [],
+        current_medications: profile?.current_medications || [],
+        family_history: profile?.family_history || [],
+        food_preferences: profile?.food_preferences || [],
+
+        other_conditions: profile?.other_conditions || '',
+        other_allergy: profile?.other_allergy || '',
+        other_medication: profile?.other_medication || '',
+        other_family_condition: profile?.other_family_condition || '',
+        other_family_relation: profile?.other_family_relation || '',
+        other_food_preference: profile?.other_food_preference || '',
+
+        blood_group: profile?.blood_group || '',
+        bp_high: !!profile?.bp_high,
+        bp_low: !!profile?.bp_low,
+        diabetic: !!profile?.diabetic,
+        sugar_level: profile?.sugar_level || '',
+        bp_reading: profile?.bp_reading || '',
+
+        thermal: profile?.thermal || '',
+        thirst: profile?.thirst || '',
+        sleep_pattern: profile?.sleep_pattern || '',
+        mental_state: profile?.mental_state || '',
+
+        sleep_quality: constitutionalForm.sleep_quality,
+        stress_level: constitutionalForm.stress_level,
+        energy_level: constitutionalForm.energy_level,
+        appetite_level: constitutionalForm.appetite_level,
+
+        overthinking_level: profile?.overthinking_level || '',
+        anger_level: profile?.anger_level || ''
+      };
+
+      await registerPatient(updatedProfile);
+
+      setProfile(updatedProfile);
+      setShowConstitutionModal(false);
+    } catch (err) {
+      alert(err.message || 'Failed to update constitutional profile.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
     <div className="home-container fade-in">
       <header className="home-header">
@@ -83,7 +167,7 @@ const HomePage = ({ user }) => {
             <Activity size={32} color="white" />
             <div className="bento-text">
               <h3>Analyze Symptoms</h3>
-              <p>AI-powered remedy matching</p>
+              <p>Personalized remedy matching</p>
             </div>
           </div>
 
@@ -127,9 +211,8 @@ const HomePage = ({ user }) => {
           </div>
         </div>
 
-        <div className="section-header">
+        <div className="section-header wellness-title">
           <h2>Wellness Insights</h2>
-          <span onClick={() => navigate('/health-profile')}>Edit Profile</span>
         </div>
 
         <div className="premium-snapshot-card">
@@ -148,7 +231,7 @@ const HomePage = ({ user }) => {
             <InsightItem icon={<Utensils size={18} />} label="Appetite" value={displayValue(profile?.appetite_level)} />
           </div>
 
-          <button className="snapshot-action" onClick={() => navigate('/health-profile')}>
+          <button className="snapshot-action" onClick={handleOpenConstitutionModal}>
             Update constitutional profile
           </button>
         </div>
@@ -176,6 +259,52 @@ const HomePage = ({ user }) => {
           <BookOpen size={48} className="bg-icon" />
         </div>
       </div>
+
+      {showConstitutionModal && (
+        <div className="modal-backdrop">
+          <div className="constitution-modal">
+            <button className="modal-close" onClick={() => setShowConstitutionModal(false)}>
+              <X size={22} />
+            </button>
+
+            <span className="modal-label">Quick Update</span>
+            <h2>Constitutional Profile</h2>
+            <p>Update only your wellness pattern without opening the full profile.</p>
+
+            <ModalSelect
+              label="Sleep Quality"
+              value={constitutionalForm.sleep_quality}
+              options={['Very Poor', 'Poor', 'Normal', 'Good', 'Very Good']}
+              onChange={(value) => setConstitutionalForm({ ...constitutionalForm, sleep_quality: value })}
+            />
+
+            <ModalSelect
+              label="Stress Level"
+              value={constitutionalForm.stress_level}
+              options={['Low', 'Moderate', 'High', 'Severe']}
+              onChange={(value) => setConstitutionalForm({ ...constitutionalForm, stress_level: value })}
+            />
+
+            <ModalSelect
+              label="Energy Level"
+              value={constitutionalForm.energy_level}
+              options={['Very Low', 'Low', 'Normal', 'High', 'Very High']}
+              onChange={(value) => setConstitutionalForm({ ...constitutionalForm, energy_level: value })}
+            />
+
+            <ModalSelect
+              label="Appetite Level"
+              value={constitutionalForm.appetite_level}
+              options={['Low', 'Normal', 'High', 'Very High']}
+              onChange={(value) => setConstitutionalForm({ ...constitutionalForm, appetite_level: value })}
+            />
+
+            <button className="modal-save-btn" onClick={handleSaveConstitution} disabled={saving}>
+              {saving ? 'Saving...' : 'Save Changes'}
+            </button>
+          </div>
+        </div>
+      )}
 
       <style>{`
 :root{
@@ -291,6 +420,10 @@ font-size:13px;
 font-weight:700;
 color:var(--primary-700);
 cursor:pointer;
+}
+
+.wellness-title{
+margin-bottom:14px;
 }
 
 .bento-grid{
@@ -623,6 +756,121 @@ border-radius:4px;
 background:white;
 }
 
+.modal-backdrop{
+position:fixed;
+inset:0;
+background:rgba(36,20,63,.55);
+backdrop-filter:blur(8px);
+z-index:999;
+display:flex;
+align-items:flex-end;
+justify-content:center;
+padding:18px;
+animation:fadeIn .25s ease;
+}
+
+.constitution-modal{
+width:100%;
+max-width:440px;
+background:linear-gradient(180deg,#ffffff,#f4eeff);
+border-radius:32px 32px 24px 24px;
+padding:26px 22px 22px;
+box-shadow:0 -12px 40px rgba(0,0,0,.18);
+position:relative;
+animation:slideUpModal .28s ease;
+}
+
+.modal-close{
+position:absolute;
+right:18px;
+top:18px;
+width:40px;
+height:40px;
+border:none;
+border-radius:14px;
+background:#f1e8ff;
+color:var(--primary-700);
+display:flex;
+align-items:center;
+justify-content:center;
+}
+
+.modal-label{
+font-size:11px;
+font-weight:900;
+text-transform:uppercase;
+letter-spacing:.7px;
+color:var(--primary-700);
+}
+
+.constitution-modal h2{
+font-size:24px;
+font-weight:900;
+color:var(--text-dark);
+margin:8px 0 6px;
+}
+
+.constitution-modal p{
+font-size:13px;
+font-weight:600;
+line-height:1.5;
+color:var(--text-muted);
+margin-bottom:18px;
+}
+
+.modal-field{
+margin-bottom:14px;
+}
+
+.modal-field label{
+display:block;
+font-size:12px;
+font-weight:900;
+color:var(--text-dark);
+margin-bottom:7px;
+}
+
+.modal-field select{
+width:100%;
+padding:14px 16px;
+border-radius:16px;
+border:1px solid rgba(143,86,235,.16);
+background:white;
+font-size:14px;
+font-weight:700;
+color:var(--text-dark);
+outline:none;
+}
+
+.modal-save-btn{
+width:100%;
+height:56px;
+border:none;
+border-radius:18px;
+background:linear-gradient(135deg,var(--primary-900),var(--primary-600));
+color:white;
+font-size:15px;
+font-weight:900;
+margin-top:8px;
+box-shadow:0 14px 28px rgba(143,86,235,.24);
+}
+
+.modal-save-btn:disabled{
+opacity:.6;
+box-shadow:none;
+}
+
+@keyframes slideUpModal{
+from{
+opacity:0;
+transform:translateY(40px);
+}
+to{
+opacity:1;
+transform:translateY(0);
+}
+}
+
 .bento-large:active,
 .bento-small:active,
 .cat-item:active,
@@ -672,6 +920,20 @@ const InsightItem = ({ icon, label, value }) => {
       <div className="insight-icon">{icon}</div>
       <span>{label}</span>
       <strong>{value}</strong>
+    </div>
+  );
+};
+
+const ModalSelect = ({ label, value, options, onChange }) => {
+  return (
+    <div className="modal-field">
+      <label>{label}</label>
+      <select value={value} onChange={(e) => onChange(e.target.value)}>
+        <option value="">Select</option>
+        {options.map((option) => (
+          <option key={option} value={option}>{option}</option>
+        ))}
+      </select>
     </div>
   );
 };
