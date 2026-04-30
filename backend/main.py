@@ -121,7 +121,7 @@ def login(user: UserLogin):
     }
 
 
-@app.get("/symptoms")
+
 @app.get("/symptoms")
 def get_symptoms():
     df = get_df()
