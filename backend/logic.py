@@ -293,14 +293,17 @@ def apply_safety_checks(
             ]
         })
 
-    if patient.get("existing_conditions"):
+    # Check for specific existing conditions
+    existing = patient.get("existing_conditions", [])
+    if existing and any(cond.strip() for cond in existing):
+        conditions_str = ", ".join([c.strip() for c in existing if c.strip()])
         warnings.append({
-            "issue": "Existing Medical Conditions",
-            "reason": "Pre-existing health conditions noted.",
+            "issue": f"Health Profile: {conditions_str}",
+            "reason": "You have these pre-existing conditions saved in your profile.",
             "advice": [
-                "Ensure remedy compatibility with current treatment",
-                "Do not stop existing prescribed medicines",
-                "Consult your healthcare provider"
+                "This remedy is checked against your specific health profile",
+                "Ensure compatibility with your current medications",
+                "Maintain your regular prescribed health routine"
             ]
         })
 
