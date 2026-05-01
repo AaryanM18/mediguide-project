@@ -296,23 +296,23 @@ def apply_safety_checks(
     if patient.get("existing_conditions"):
         warnings.append({
             "issue": "Existing Medical Conditions",
-           # "reason": "Patient has pre-existing medical conditions.",
-           # "advice": [
-              #  "Check remedy compatibility carefully",
-               # "Continue current prescribed treatment",
-                #"Consult a doctor if symptoms worsen"
-           # ]
+            "reason": "Pre-existing health conditions noted.",
+            "advice": [
+                "Ensure remedy compatibility with current treatment",
+                "Do not stop existing prescribed medicines",
+                "Consult your healthcare provider"
+            ]
         })
 
     if patient.get("allergies"):
         warnings.append({
-           # "issue": "Allergy History",
-           # "reason": "Patient has a history of allergies.",
-          #  "advice": [
-              #  "Review ingredients before use",
-               # "Watch for allergic reactions",
-                #"Stop use if irritation occurs"
-           # ]
+            "issue": "Known Allergies",
+            "reason": "History of allergic sensitivities.",
+            "advice": [
+                "Review all ingredients carefully",
+                "Perform a patch test if applicable",
+                "Monitor for any adverse reaction"
+            ]
         })
 
     if patient.get("age", 0) > 60:
