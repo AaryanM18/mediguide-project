@@ -1,3 +1,4 @@
+from logic import get_model, get_df, build_embeddings
 from fastapi import FastAPI, HTTPException
 print("✅ FastAPI imported")
 
@@ -64,6 +65,19 @@ app = FastAPI(
 
 print("✅ FastAPI app created")
 
+
+@app.on_event("startup")
+def startup():
+    print("Loading model...")
+    get_model()
+
+    print("Loading dataset...")
+    get_df()
+
+    print("Building embeddings...")
+    build_embeddings()
+
+    print("Startup preload complete")
 
 app.add_middleware(
     CORSMiddleware,
