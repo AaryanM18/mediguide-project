@@ -8,6 +8,10 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 if not DATABASE_URL:
     raise Exception("DATABASE_URL not found")
 
+# Fix for Render/SQLAlchemy compatibility if needed
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+
 
 def get_db():
     try:
@@ -76,6 +80,14 @@ def init_db():
                 id TEXT PRIMARY KEY,
                 email TEXT UNIQUE,
                 password TEXT
+            )
+        """)
+
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS saved_remedies (
+                user_id TEXT,
+                data JSONB,
+                PRIMARY KEY (user_id)
             )
         """)
 
