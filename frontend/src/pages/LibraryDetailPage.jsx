@@ -134,7 +134,7 @@ animationDelay:`${idx*.06}s`
 --glow:rgba(143,86,235,.28);
 }
 
-/* CONTAINER */
+/* CONTSmartNER */
 
 .library-detail-container{
 min-height:100vh;

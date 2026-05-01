@@ -191,7 +191,7 @@ color="white"
 </div>
 
 <span className="mini-label">
-AI Homeopathic Assistant
+Expert Homeopathic Assistant
 </span>
 
 <h1>Create Account</h1>

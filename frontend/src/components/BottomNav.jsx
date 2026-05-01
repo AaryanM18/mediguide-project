@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { Home, Search, Bookmark, Settings, Clock } from 'lucide-react';
+import { Home, Search, Bookmark, User, History } from 'lucide-react';
 
 const BottomNav = () => {
     return (
@@ -13,17 +13,20 @@ const BottomNav = () => {
             </NavLink>
             <NavLink to="/history" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
                 <div className="nav-icon-box">
-                    <Clock size={24} />
+                    <History size={24} />
+                    <span className="nav-text">History</span>
                 </div>
             </NavLink>
             <NavLink to="/saved" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
                 <div className="nav-icon-box">
                     <Bookmark size={24} />
+                    <span className="nav-text">Saved</span>
                 </div>
             </NavLink>
             <NavLink to="/profile" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
                 <div className="nav-icon-box">
-                    <Settings size={24} />
+                    <User size={24} />
+                    <span className="nav-text">Profile</span>
                 </div>
             </NavLink>
 

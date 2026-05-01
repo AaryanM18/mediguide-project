@@ -108,10 +108,10 @@ color="white"
 </div>
 
 <span className="mini-label">
-AI Homeopathic Assistant
+Expert Homeopathic Assistant
 </span>
 
-<h1>MediGuide AI</h1>
+<h1>MediGuide</h1>
 
 <p>
 Your Personal Homeo Advisor

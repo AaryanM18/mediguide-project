@@ -199,7 +199,7 @@ const buildSafety = (row, patient = {}) => {
   }
 
   if (has("migraine")) {
-    warnings.push("🧠 MIGRAINE: Avoid bright light, loud noise, strong smells, and skipping meals.");
+    warnings.push("🧠 MIGRSmartNE: Avoid bright light, loud noise, strong smells, and skipping meals.");
   }
 
   if (has("gastric")) {
@@ -260,138 +260,71 @@ const buildSafety = (row, patient = {}) => {
 };
 
 export const performConsultation = async (userId, symptomsInput) => {
-  const list = Array.isArray(symptomsInput)
-    ? symptomsInput
-    : [];
+  // If we have multiple symptoms, we'll combine them for the backend
+  // or just send the primary one. The current backend expects a single string.
+  const symptomsStr = Array.isArray(symptomsInput) 
+    ? symptomsInput.map(s => `${s.symptom} (${s.severity})`).join(", ")
+    : symptomsInput;
 
-  if (list.length === 0) {
-    return {
-      success: false,
-      detail: {
-        error: "No symptoms selected."
-      }
-    };
-  }
-
-  const rows = [];
-  const querySyms = [];
-
-  list.forEach((item) => {
-    const sym = item.symptom.trim().toLowerCase();
-    const sev = item.severity.trim().toLowerCase();
-
-    querySyms.push(`${sym} (${sev})`);
-
-    let row = mappings.find(
-      (r) =>
-        (r.symptom || "").toString().trim().toLowerCase() === sym &&
-        (r.severity || "").toString().trim().toLowerCase() === sev
-    );
-
-    if (!row) {
-      row = mappings.find(
-        (r) =>
-          (r.symptom || "").toString().trim().toLowerCase().includes(sym) &&
-          (r.severity || "").toString().trim().toLowerCase() === sev
-      );
-    }
-
-    if (row) rows.push(row);
-  });
-
-  if (rows.length === 0) {
-    return {
-      success: false,
-      detail: {
-        error: "No remedy found for the selected symptoms."
-      }
-    };
-  }
-
-  const patientRaw = localStorage.getItem(`patient_${userId}`);
-  const patient = patientRaw ? JSON.parse(patientRaw) : {};
-
-  const remedyCounts = {};
-
-  rows.forEach((r) => {
-    remedyCounts[r.remedy_name] = (remedyCounts[r.remedy_name] || 0) + 1;
-  });
-
-  const bestRow = rows.sort(
-    (a, b) => remedyCounts[b.remedy_name] - remedyCounts[a.remedy_name]
-  )[0];
-
-  const safety = buildSafety(bestRow, patient);
-
-  const result = {
-    success: true,
-    query: {
-      symptom: querySyms.join(", "),
-      severity: "Various",
-      patient_name: patient.name || "Patient"
-    },
-    remedy: {
-      name: bestRow.remedy_name,
-      potency: bestRow.potency,
-      possible_condition:
-        rows.length > 1
-          ? `Multiple Symptoms (Primary Match: ${bestRow.possible_condition})`
-          : bestRow.possible_condition,
-      keynote: bestRow.keynote_indication,
-      why_this_remedy:
-        rows.length > 1
-          ? `Selected for totality of symptoms based on highest coverage. ${bestRow.remedy_reason}`
-          : bestRow.remedy_reason,
-      source_book: bestRow.source_book,
-      additional_notes: bestRow.additional_notes,
-      lifestyle: {
-        dietary_restrictions: bestRow.dietary_restrictions,
-        what_to_avoid: bestRow.what_to_avoid
-      }
-    },
-    patient_safety: {
-      is_safe: safety.is_safe,
-      warnings: safety.warnings,
-      bp_note: bestRow.suitable_for_bp_high,
-      diabetes_note: bestRow.suitable_for_diabetic,
-      allergy_note: bestRow.avoid_if_allergy
-    },
-    lifestyle: {
-      dietary_restrictions: bestRow.dietary_restrictions,
-      what_to_avoid: bestRow.what_to_avoid
-    },
-    consult_doctor:
-      (bestRow.consult_doctor || "").toString().trim().toLowerCase() === "yes"
-  };
-
-  const histRaw = localStorage.getItem(`history_${userId}`);
-  let history = histRaw ? JSON.parse(histRaw) : [];
-
-  history.unshift({
-    user_id: userId,
-    symptom: querySyms.join(" + "),
-    severity: "Various",
-    remedy_name: bestRow.remedy_name,
-    potency: bestRow.potency,
-    condition: result.remedy.possible_condition,
-    consult_doctor: result.consult_doctor,
-    created_at: new Date().toLocaleString()
-  });
-
-  history = history.slice(0, 20);
-
-  localStorage.setItem(`history_${userId}`, JSON.stringify(history));
+  const severity = Array.isArray(symptomsInput) && symptomsInput.length > 0
+    ? symptomsInput[0].severity
+    : "moderate";
 
   try {
-    await apiClient.post("/api/patient/history", {
+    const response = await apiClient.post("/consult", {
       user_id: userId,
-      data: history
+      symptom: symptomsStr,
+      severity: severity
     });
-  } catch (err) {
-    console.error("History sync failed:", err);
-  }
 
-  return result;
+    const data = response.data;
+
+    if (!data.success) {
+      throw new Error(data.message || "Consultation failed");
+    }
+
+    // Map backend response to frontend structure
+    const result = {
+      success: true,
+      query: data.data.query,
+      remedy: data.data.remedy,
+      patient_safety: {
+        is_safe: true, // Default to true, backend warnings are descriptive
+        warnings: data.warnings.map(w => `${w.issue}: ${w.reason} ${w.advice ? w.advice.join(' ') : ''}`),
+        bp_note: data.data.remedy.bp_note || "",
+        diabetes_note: data.data.remedy.diabetes_note || "",
+        allergy_note: data.data.remedy.allergy_note || ""
+      },
+      lifestyle: data.data.remedy.lifestyle || {
+        dietary_restrictions: "Warm water; avoid cold drinks; light food.",
+        what_to_avoid: "Coffee / Camphor / Mint / Strong smells"
+      },
+      consult_doctor: data.data.consult_doctor || false
+    };
+
+    // Save to local history
+    const histRaw = localStorage.getItem(`history_${userId}`);
+    let history = histRaw ? JSON.parse(histRaw) : [];
+
+    history.unshift({
+      user_id: userId,
+      symptom: result.query.symptom,
+      severity: result.query.severity,
+      remedy_name: result.remedy.name,
+      potency: result.remedy.potency,
+      condition: result.remedy.possible_condition,
+      consult_doctor: result.consult_doctor,
+      created_at: new Date().toLocaleString()
+    });
+
+    history = history.slice(0, 20);
+    localStorage.setItem(`history_${userId}`, JSON.stringify(history));
+
+    return result;
+
+  } catch (error) {
+    return handleAxiosError(error, "Consultation failed");
+  }
 };
 
 export const getHistory = async (userId) => {

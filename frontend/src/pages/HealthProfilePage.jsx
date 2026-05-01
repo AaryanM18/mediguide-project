@@ -262,7 +262,7 @@ const HealthProfilePage = ({ user }) => {
             <div className="shield-plus">+</div>
           </div>
           <h1>Health Profile</h1>
-          <p>Comprehensive health details for safer AI care</p>
+          <p>Comprehensive health details for safer Smart care</p>
         </div>
       </header>
 

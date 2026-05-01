@@ -5,12 +5,19 @@ import { useNavigate } from 'react-router-dom';
 const SymptomSearchPage = () => {
     const navigate = useNavigate();
 
+    const [searchTerm, setSearchTerm] = React.useState("");
+
     const quickSearches = [
         { name: "Headache", icon: <Thermometer size={24} color="#F87171" />, color: "red" },
         { name: "Cold", icon: <Activity size={24} color="#60A5FA" />, color: "blue" },
         { name: "Anxiety", icon: <Heart size={24} color="#34D399" />, color: "green" },
         { name: "Digestive", icon: <Brain size={24} color="#FBBF24" />, color: "yellow" }
     ];
+
+    const handleAnalyze = () => {
+        if (!searchTerm.trim()) return;
+        navigate('/find', { state: { prefilledSymptom: searchTerm.trim() } });
+    };
 
     return (
         <div className="search-page-container fade-in">
@@ -29,14 +36,19 @@ const SymptomSearchPage = () => {
             <div className="search-body">
                 <section className="search-intro">
                     <h2>How are you feeling?</h2>
-                    <p>You can describe multiple symptoms. Let our AI find the common diagnosis.</p>
+                    <p>You can describe multiple symptoms. Let our Smart find the common diagnosis.</p>
                 </section>
 
                 <section className="common-searches">
                     <h3>Common Searches</h3>
                     <div className="quick-grid">
                         {quickSearches.map((s, i) => (
-                            <div key={i} className="quick-card">
+                            <div 
+                                key={i} 
+                                className="quick-card"
+                                onClick={() => navigate('/find', { state: { prefilledSymptom: s.name } })}
+                                style={{cursor: 'pointer'}}
+                            >
                                 <div className="quick-icon-box">
                                    {s.icon}
                                 </div>
@@ -53,6 +65,8 @@ const SymptomSearchPage = () => {
                             <textarea 
                                 placeholder="Search or describe symptoms (e.g. slight fever tonight)..."
                                 className="search-textarea"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
                             />
                             <div className="scan-icon-box">
                                 <Scan size={24} color="#8b5cf6" />
@@ -65,7 +79,11 @@ const SymptomSearchPage = () => {
                         </button>
                     </div>
 
-                    <button className="btn btn-primary analyze-now" onClick={() => navigate('/find')}>
+                    <button 
+                        className="btn btn-primary analyze-now" 
+                        onClick={handleAnalyze}
+                        disabled={!searchTerm.trim()}
+                    >
                         Analyze Now
                     </button>
                 </div>
@@ -321,7 +339,7 @@ font-weight:900;
 z-index:1;
 }
 
-/* MAIN SEARCH CARD */
+/* MSmartN SEARCH CARD */
 
 .main-search-card{
 padding:24px;

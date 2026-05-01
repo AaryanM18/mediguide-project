@@ -14,8 +14,7 @@ print("✅ auth.py imported")
 
 from schemas import (
     UserSignup,
-    UserLogin,
-    HistorySyncRequest
+    UserLogin
 )
 print("✅ auth schemas imported")
 
@@ -34,10 +33,7 @@ print("✅ patient schemas imported")
 from crud import (
     register_patient,
     get_patient_from_db,
-    save_consultation,
-    get_consultation_history,
-    get_saved_remedies,
-    save_remedies
+    save_consultation
 )
 print("✅ crud.py imported")
 
@@ -232,32 +228,3 @@ def consult(req: ConsultRequest):
         "warnings": safety_warnings,
         "message": human_message
     }
-
-
-@app.get("/api/patient/history/{user_id}")
-def get_history(user_id: str):
-    history = get_consultation_history(user_id)
-    return {
-        "success": True,
-        "history": history
-    }
-
-
-@app.post("/api/patient/history")
-def sync_history(req: HistorySyncRequest):
-    return {"success": True}
-
-
-@app.get("/api/patient/saved/{user_id}")
-def get_saved(user_id: str):
-    saved = get_saved_remedies(user_id)
-    return {
-        "success": True,
-        "saved_remedies": saved
-    }
-
-
-@app.post("/api/patient/saved")
-def save_remedy(req: HistorySyncRequest):
-    save_remedies(req.user_id, req.data)
-    return {"success": True}

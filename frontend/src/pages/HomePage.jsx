@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import {
   User, Activity, Lightbulb, Folder, Brain,
-  ThermometerSun, Leaf, ScanHeart, BookOpen, Moon, Zap, Flame, Utensils, X
+  ThermometerSun, Leaf, ScanHeart, BookOpen, Moon, Zap, Flame, Utensils, X,
+  Search, ClipboardList, Stethoscope, HeartPulse
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { getHealthFacts, getPatientProfile, registerPatient } from '../services/api';
@@ -159,12 +160,11 @@ const HomePage = ({ user }) => {
       <div className="home-content">
         <div className="section-header">
           <h2>Health Actions</h2>
-          <span onClick={() => navigate('/health-profile')}>See all</span>
         </div>
 
         <div className="bento-grid">
           <div className="bento-large" onClick={() => navigate('/find')}>
-            <Activity size={32} color="white" />
+            <Search size={32} color="white" />
             <div className="bento-text">
               <h3>Analyze Symptoms</h3>
               <p>Personalized remedy matching</p>
@@ -173,12 +173,12 @@ const HomePage = ({ user }) => {
 
           <div className="bento-side-col">
             <div className="bento-small" onClick={() => navigate('/learn')}>
-              <Lightbulb size={24} color="white" />
+              <Zap size={24} color="white" />
               <h3>Health Tips</h3>
             </div>
 
             <div className="bento-small darker" onClick={() => navigate('/history')}>
-              <Folder size={24} color="white" />
+              <ClipboardList size={24} color="white" />
               <h3>Records</h3>
             </div>
           </div>

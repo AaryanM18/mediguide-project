@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ChevronLeft, Sparkles, AlertTriangle, ShieldCheck, Activity, Info } from 'lucide-react';
+import { ArrowLeft, Stars, AlertCircle, ShieldCheck, HeartPulse, Info, Stethoscope } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { getSymptoms, performConsultation, getSavedRemedies, updateSavedRemedies } from '../services/api';
 
@@ -30,18 +30,27 @@ const SymptomAnalysisPage = ({ user }) => {
     }, [result, user.id]);
 
     const toggleSave = async () => {
-        if (!result) return;
-        let saved = JSON.parse(localStorage.getItem(`saved_remedies_${user.id}`)) || [];
-        const name = result.remedy.name;
+        if (!result || !result.remedy) return;
         
-        if (isSaved) {
-            saved = saved.filter(r => (r.remedy?.name || r.name) !== name);
-        } else {
-            saved.push(result);
+        try {
+            const res = await getSavedRemedies(user.id);
+            let saved = res.saved_remedies || [];
+            const name = result.remedy.name;
+            
+            const alreadySaved = saved.some(r => (r.remedy?.name || r.name) === name);
+            
+            if (alreadySaved) {
+                saved = saved.filter(r => (r.remedy?.name || r.name) !== name);
+            } else {
+                saved.push(result);
+            }
+            
+            await updateSavedRemedies(user.id, saved);
+            setIsSaved(!alreadySaved);
+        } catch (err) {
+            console.error("Error toggling save:", err);
+            setError("Failed to save remedy. Please try again.");
         }
-        
-        await updateSavedRemedies(user.id, saved);
-        setIsSaved(!isSaved);
     };
 
     useEffect(() => {
@@ -81,8 +90,12 @@ const SymptomAnalysisPage = ({ user }) => {
     };
 
     const handleAnalyze = async () => {
-        const toAnalyze = selectedSymptom && selectedSeverity 
-            ? [...selectedSymptomsList, { symptom: selectedSymptom, severity: selectedSeverity }] 
+        // If they typed something but didn't select from dropdown, use the searchTerm
+        const currentSymptom = selectedSymptom || searchTerm;
+        const currentSeverity = selectedSeverity || "moderate";
+
+        const toAnalyze = currentSymptom 
+            ? [...selectedSymptomsList, { symptom: currentSymptom, severity: currentSeverity }] 
             : selectedSymptomsList;
 
         if (toAnalyze.length === 0) return;
@@ -128,7 +141,7 @@ const SymptomAnalysisPage = ({ user }) => {
         <div className="analysis-container fade-in">
             <header className="analysis-header gradient-bg">
                 <button className="back-btn" onClick={() => navigate(-1)}>
-                    <ChevronLeft size={24} color="white" />
+                    <ArrowLeft size={24} color="white" />
                 </button>
                 <div className="analysis-header-content">
                     <h1>Symptom Analysis</h1>
@@ -157,48 +170,44 @@ const SymptomAnalysisPage = ({ user }) => {
 
                         <section className="input-section premium-card fade-in" style={{ position: 'relative', zIndex: 50 }}>
                             <div className="section-head-row">
-                                <Activity size={24} color="#8b5cf6" />
-                                <h2>Select Symptom</h2>
+                                <Stethoscope size={24} color="#8b5cf6" />
+                                <h2>Describe Symptoms</h2>
                             </div>
-                            <p className="subtext">Choose the main issue you are experiencing.</p>
+                            <p className="subtext">Type naturally (e.g., "I have a sharp pain in my head").</p>
                             
                             {error && <div className="error-message"><AlertTriangle size={18}/> {error}</div>}
 
                             <div className="autocomplete-wrapper">
-                                <input 
-                                    type="text"
+                                <textarea 
                                     className="premium-select" 
-                                    placeholder="Type symptom (min 3 letters)..."
+                                    style={{height: '100px', resize: 'none'}}
+                                    placeholder="What are you experiencing?"
                                     value={searchTerm}
                                     onChange={(e) => {
                                         setSearchTerm(e.target.value);
                                         setShowDropdown(true);
-                                        if (e.target.value !== selectedSymptom) {
-                                            setSelectedSymptom("");
-                                            setSelectedSeverity("");
-                                        }
                                     }}
                                     onFocus={() => setShowDropdown(true)}
-                                    onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
-                                    disabled={!!error || allSymptoms.length === 0}
                                 />
-                                {showDropdown && searchTerm.length >= 3 && (
-                                    <ul className="autocomplete-dropdown">
-                                        {filteredSymptoms.map(sym => (
-                                            <li key={sym} onMouseDown={(e) => {
-                                                e.preventDefault();
-                                                setSelectedSymptom(sym);
-                                                setSearchTerm(sym);
-                                                setSelectedSeverity("");
-                                                setShowDropdown(false);
-                                            }}>
-                                                {sym}
-                                            </li>
-                                        ))}
-                                        {filteredSymptoms.length === 0 && (
-                                            <li className="no-result">No matching symptoms found</li>
-                                        )}
-                                    </ul>
+                                {showDropdown && filteredSymptoms.length > 0 && (
+                                    <div className="suggestion-box">
+                                        <p style={{fontSize: '11px', fontWeight: '800', color: '#94a3b8', marginBottom: '8px', textTransform: 'uppercase'}}>Quick Suggestions</p>
+                                        <div style={{display: 'flex', flexWrap: 'wrap', gap: '8px'}}>
+                                            {filteredSymptoms.map(sym => (
+                                                <button 
+                                                    key={sym} 
+                                                    className="suggestion-tag"
+                                                    onClick={() => {
+                                                        setSelectedSymptom(sym);
+                                                        setSearchTerm(sym);
+                                                        setShowDropdown(false);
+                                                    }}
+                                                >
+                                                    {sym}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
                                 )}
                             </div>
                         </section>
@@ -206,7 +215,7 @@ const SymptomAnalysisPage = ({ user }) => {
                         {selectedSymptom && symptomsData[selectedSymptom] && (
                             <section className="input-section premium-card fade-in delay-1">
                                 <div className="section-head-row">
-                                    <AlertTriangle size={24} color="#f59e0b" />
+                                    <AlertCircle size={24} color="#f59e0b" />
                                     <h2>Intensity Level</h2>
                                 </div>
                                 <p className="subtext">How severe is the {selectedSymptom}?</p>
@@ -249,22 +258,26 @@ const SymptomAnalysisPage = ({ user }) => {
 
                         <button 
                             className="btn btn-primary analyze-btn" 
-                            disabled={(selectedSymptomsList.length === 0 && (!selectedSymptom || !selectedSeverity)) || analyzing}
+                            disabled={(!searchTerm && selectedSymptomsList.length === 0) || analyzing}
                             onClick={handleAnalyze}
                         >
-                            {analyzing ? "Analyzing..." : "Get AI Advice"}
+                            {analyzing ? "Analyzing..." : "Get Advice"}
                         </button>
                     </>
                 ) : (
                     <div className="result-view fade-in">
                         <div className="result-header" style={{ position: 'relative' }}>
                             <button 
-                                onClick={toggleSave}
-                                style={{ position: 'absolute', top: 0, right: 0, padding: '8px', background: 'none', border: 'none', cursor: 'pointer', color: isSaved ? '#8b5cf6' : '#cbd5e1', transition: 'all 0.2s' }}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    toggleSave();
+                                }}
+                                className="save-btn-floating"
+                                aria-label="Save remedy"
                             >
-                                <svg width="32" height="32" viewBox="0 0 24 24" fill={isSaved ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m19 21-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>
+                                <svg width="28" height="28" viewBox="0 0 24 24" fill={isSaved ? "#f59e0b" : "none"} stroke={isSaved ? "#f59e0b" : "white"} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m19 21-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>
                             </button>
-                            <Sparkles size={40} color="#8b5cf6" />
+                            <Stars size={40} color="#8b5cf6" />
                             <h2>Recommended Remedy</h2>
                             <p className="remedy-name">{result.remedy.name}</p>
                             <div style={{display: 'flex', gap: '8px', justifyContent: 'center', marginTop: '8px'}}>
@@ -276,7 +289,7 @@ const SymptomAnalysisPage = ({ user }) => {
                         <div className="result-info-stack">
 
     <div className="info-card condition-card">
-        <Activity size={20} color="#8b5cf6" />
+        <HeartPulse size={20} color="#8b5cf6" />
         <h5>Possible Condition</h5>
         <p>{result.remedy.possible_condition}</p>
     </div>
@@ -554,6 +567,32 @@ color:#4c1d95;
 border-bottom:1px solid #f3f4f6;
 }
 
+.suggestion-box {
+    margin-top: 12px;
+    padding: 12px;
+    background: #f8fafc;
+    border-radius: 16px;
+    border: 1px solid #f1f5f9;
+}
+
+.suggestion-tag {
+    padding: 6px 12px;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #475569;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.suggestion-tag:hover {
+    border-color: #8b5cf6;
+    color: #8b5cf6;
+    background: #f5f3ff;
+}
+
 /* SYMPTOM TAGS */
 
 .add-sym-btn{
@@ -610,7 +649,7 @@ box-shadow:
 0 12px 24px rgba(143,86,235,.25);
 }
 
-/* MAIN CTA */
+/* MSmartN CTA */
 
 .analyze-btn{
 height:62px;
@@ -657,6 +696,34 @@ box-shadow:
 margin-bottom:26px;
 position:relative;
 overflow:hidden;
+}
+
+.save-btn-floating {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 50px;
+    height: 50px;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 10;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.save-btn-floating:active {
+    transform: scale(0.9);
+}
+
+.save-btn-floating:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: translateY(-2px);
 }
 
 .result-header:after{
