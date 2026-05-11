@@ -1320,19 +1320,261 @@ def apply_safety_checks(
                         "Seek medical support when needed"
                     ]
                 }
-            ]))       
+            ]))    
+
+
+
+##############################################################################################################################            
+##############################################################################################################################            
+
+
 
 
     if patient.get("allergies"):
-        warnings.append({
-            "issue": "Known Allergies",
-            "reason": "History of allergic sensitivities.",
-            "advice": [
-                "Review all ingredients carefully",
-                "Perform a patch test if applicable",
-                "Monitor for any adverse reaction"
-            ]
-        })
+      for allergy in patient.get("allergies"):
+
+        if allergy == "Dust":
+            warnings.append(random.choice([
+                {
+                    "issue": "Dust Allergy",
+                    "reason": "Dust exposure may trigger allergic reactions.",
+                    "advice": [
+                        "Avoid dusty environments",
+                        "Keep surroundings clean",
+                        "Use a mask if necessary"
+                    ]
+                },
+                {
+                    "issue": "Respiratory Allergy Alert",
+                    "reason": "Dust sensitivity may worsen breathing discomfort.",
+                    "advice": [
+                        "Maintain clean indoor air",
+                        "Avoid smoke and dust exposure",
+                        "Monitor sneezing or coughing"
+                    ]
+                }
+            ]))
+
+        
+        elif allergy == "Pollen":
+            warnings.append(random.choice([
+                {
+                    "issue": "Pollen Allergy",
+                    "reason": "Pollen exposure may trigger allergic reactions.",
+                    "advice": [
+                        "Avoid outdoor exposure during high pollen times",
+                        "Keep windows closed when possible",
+                        "Monitor sneezing or breathing discomfort"
+                    ]
+                },
+                {
+                    "issue": "Seasonal Allergy Alert",
+                    "reason": "Pollen sensitivity may worsen respiratory symptoms.",
+                    "advice": [
+                        "Use a mask outdoors if necessary",
+                        "Wash hands and face after outdoor exposure",
+                        "Stay hydrated"
+                    ]
+                }
+            ]))
+
+        elif allergy == "Milk":
+            warnings.append(random.choice([
+                {
+                    "issue": "Milk Allergy",
+                    "reason": "Dairy products may trigger allergic symptoms.",
+                    "advice": [
+                        "Avoid milk-based products",
+                        "Check food labels carefully",
+                        "Monitor digestive or skin reactions"
+                    ]
+                },
+                {
+                    "issue": "Dairy Allergy Alert",
+                    "reason": "Milk sensitivity may affect digestion and immunity.",
+                    "advice": [
+                        "Use dairy alternatives if needed",
+                        "Avoid foods containing hidden milk ingredients",
+                        "Seek help if severe reactions occur"
+                    ]
+                }
+            ]))
+
+        elif allergy == "Egg":
+            warnings.append(random.choice([
+                {
+                    "issue": "Egg Allergy",
+                    "reason": "Egg consumption may trigger allergic reactions.",
+                    "advice": [
+                        "Avoid egg-containing foods",
+                        "Read packaged food labels carefully",
+                        "Monitor swelling or skin irritation"
+                    ]
+                },
+                {
+                    "issue": "Food Allergy Alert",
+                    "reason": "Egg sensitivity requires dietary caution.",
+                    "advice": [
+                        "Avoid processed foods containing eggs",
+                        "Watch for allergic symptoms after meals",
+                        "Consult a doctor if symptoms worsen"
+                    ]
+                }
+            ]))
+
+        elif allergy == "Peanuts":
+            warnings.append(random.choice([
+                {
+                    "issue": "Peanut Allergy",
+                    "reason": "Peanut exposure may cause severe allergic reactions.",
+                    "advice": [
+                        "Avoid peanut-containing foods",
+                        "Check ingredient labels carefully",
+                        "Seek emergency care for breathing difficulty"
+                    ]
+                },
+                {
+                    "issue": "Nut Allergy Alert",
+                    "reason": "Peanut sensitivity can become serious quickly.",
+                    "advice": [
+                        "Avoid cross-contaminated foods",
+                        "Carry prescribed emergency medication if available",
+                        "Monitor swelling or breathing issues"
+                    ]
+                }
+            ]))
+
+        elif allergy == "Seafood":
+            warnings.append(random.choice([
+                {
+                    "issue": "Seafood Allergy",
+                    "reason": "Seafood may trigger allergic reactions.",
+                    "advice": [
+                        "Avoid seafood products",
+                        "Monitor skin or breathing reactions",
+                        "Check restaurant ingredients carefully"
+                    ]
+                },
+                {
+                    "issue": "Food Sensitivity Alert",
+                    "reason": "Seafood allergies may worsen suddenly.",
+                    "advice": [
+                        "Avoid unknown seafood dishes",
+                        "Seek medical help if symptoms increase",
+                        "Maintain allergy precautions"
+                    ]
+                }
+            ]))
+
+        elif allergy == "Medicine Allergy":
+            warnings.append(random.choice([
+                {
+                    "issue": "Medicine Allergy",
+                    "reason": "Certain medicines may trigger allergic reactions.",
+                    "advice": [
+                        "Avoid known allergy-causing medicines",
+                        "Inform healthcare providers about allergies",
+                        "Monitor reactions after medication use"
+                    ]
+                },
+                {
+                    "issue": "Medication Allergy Alert",
+                    "reason": "Drug sensitivity requires extra treatment caution.",
+                    "advice": [
+                        "Check medicine ingredients carefully",
+                        "Avoid self-medication",
+                        "Seek help if allergic symptoms appear"
+                    ]
+                }
+            ]))
+
+        elif allergy == "Cold Weather":
+            warnings.append(random.choice([
+                {
+                    "issue": "Cold Weather Sensitivity",
+                    "reason": "Cold temperatures may worsen symptoms.",
+                    "advice": [
+                        "Wear warm clothing",
+                        "Avoid prolonged cold exposure",
+                        "Keep the body warm and hydrated"
+                    ]
+                },
+                {
+                    "issue": "Cold Allergy Alert",
+                    "reason": "Cold weather may trigger allergic reactions or discomfort.",
+                    "advice": [
+                        "Avoid sudden temperature changes",
+                        "Protect exposed skin",
+                        "Monitor breathing or skin irritation"
+                    ]
+                }
+            ]))
+
+        elif allergy == "Heat":
+            warnings.append(random.choice([
+                {
+                    "issue": "Heat Sensitivity",
+                    "reason": "Excess heat exposure may trigger symptoms.",
+                    "advice": [
+                        "Stay hydrated",
+                        "Avoid direct sunlight for long periods",
+                        "Rest in cool environments"
+                    ]
+                },
+                {
+                    "issue": "Heat Allergy Alert",
+                    "reason": "High temperatures may worsen allergic discomfort.",
+                    "advice": [
+                        "Wear light clothing",
+                        "Avoid overheating",
+                        "Monitor skin irritation or dizziness"
+                    ]
+                }
+            ]))
+
+        elif allergy == "Strong Smells":
+            warnings.append(random.choice([
+                {
+                    "issue": "Strong Smell Sensitivity",
+                    "reason": "Strong odors may trigger headaches or allergic reactions.",
+                    "advice": [
+                        "Avoid perfumes or chemical fumes",
+                        "Stay in ventilated environments",
+                        "Monitor breathing discomfort"
+                    ]
+                },
+                {
+                    "issue": "Odor Sensitivity Alert",
+                    "reason": "Strong smells may worsen respiratory irritation.",
+                    "advice": [
+                        "Avoid smoke or strong fragrances",
+                        "Use fresh air ventilation",
+                        "Reduce exposure to triggering smells"
+                    ]
+                }
+            ]))
+
+        elif allergy == "Other":
+            warnings.append(random.choice([
+                {
+                    "issue": "Allergy History",
+                    "reason": "Patient has reported other allergy-related sensitivities.",
+                    "advice": [
+                        "Avoid known allergy triggers",
+                        "Monitor unusual reactions",
+                        "Seek medical advice if symptoms worsen"
+                    ]
+                },
+                {
+                    "issue": "General Allergy Alert",
+                    "reason": "Unknown allergies may require additional precautions.",
+                    "advice": [
+                        "Observe body reactions carefully",
+                        "Avoid unidentified triggering substances",
+                        "Maintain proper medical guidance"
+                    ]
+                }
+            ]))    
 
     if patient.get("age", 0) > 60:
       warnings.append(random.choice([
